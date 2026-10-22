@@ -190,14 +190,28 @@ function auditFromPageSpeed(base,mobileData,desktopData){
  return base;
 }
 function renderReport(report){
- currentReport=report;const vals=Object.values(report.results).map(r=>clamp(r.score));const average=Math.round(vals.reduce((a,b)=>a+b,0)/vals.length);
- updateScore(average);drawCategories(report.results);renderFindings(report.findings);
+ currentReport=report;
+ // Only show an overall number when real PageSpeed measurements were returned.
+ // Never turn the same preset checklist values into a misleading repeated score.
+ const measured=report.performance?['mobile','desktop'].map(k=>report.performance[k]).filter(v=>typeof v==='number'&&Number.isFinite(v)):[];
+ if(measured.length){
+   const average=Math.round(measured.reduce((a,b)=>a+b,0)/measured.length);
+   updateScore(average);
+ }else{
+   $('overallScore').textContent='—';
+   $('scoreArc').style.strokeDashoffset=440;
+   $('scoreHeadline').textContent='Live score unavailable';
+   $('scoreDescription').textContent='PageSpeed did not return a measured score for this scan, so we will not show a made-up overall number. Try again later, or check whether the storefront is publicly accessible.';
+   $('scoreChip').textContent='Not measured';
+   $('scoreChip').className='score-chip warn';
+ }
+ drawCategories(report.results);renderFindings(report.findings);
  $('statChecks').textContent=categories.length;$('statIssues').textContent=report.findings.filter(f=>f.priority==='high'||f.priority==='medium').length;
- $('statPerformance').textContent=report.performance?.mobile!=null?report.performance.mobile+'/100':'Ready';
+ $('statPerformance').textContent=report.performance?.mobile!=null?report.performance.mobile+'/100':'Not measured';
  $('reportDate').textContent=new Date(report.createdAt).toLocaleString([],{month:'short',day:'numeric',hour:'2-digit',minute:'2-digit'}).toUpperCase();
  $('reportSubtitle').textContent='Review results for '+new URL(report.url).hostname;
- $('scanMeta').textContent=report.source==='pagespeed'?'PageSpeed Insights results included where available. Store policy and checkout items remain a practical checklist.':'Initial checklist prepared. PageSpeed metrics could not be retrieved, so performance scores are estimates rather than measured results.';
- $('checkChip').textContent=report.source==='pagespeed'?'Live page metrics included':'Checklist + recommendations';
+ $('scanMeta').textContent=report.source==='pagespeed'?'Measured PageSpeed results are shown where available. Store policy and checkout items remain a practical checklist.':'PageSpeed metrics could not be retrieved. The category numbers are checklist estimates, not measured live scores; the overall score is therefore not shown.';
+ $('checkChip').textContent=report.source==='pagespeed'?'Live page metrics included':'Checklist only — no live score';
  $('checkChip').className='score-chip '+(report.source==='pagespeed'?'good':'warn');
 }
 $('auditForm').addEventListener('submit',async e=>{
