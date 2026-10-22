@@ -1,1366 +1,222 @@
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
-  <title>Shopify Store Health & Performance Auditor</title>
-  <meta name="description" content="Review Shopify store performance, mobile usability, SEO, accessibility, and store health.">
-  <meta name="theme-color" content="#087f55">
-
-  <!-- Favicon: keep favicon.png beside index.html -->
-  <link rel="icon" type="image/png" href="./favicon.png">
-  <link rel="shortcut icon" type="image/png" href="./favicon.png">
-
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-
-  <style>
-    :root {
-      --green: #087f55;
-      --green-dark: #066443;
-      --green-light: #e7f7ef;
-      --bg: #f4f7f8;
-      --card: #ffffff;
-      --text: #18242d;
-      --muted: #71808b;
-      --border: #e2e9ed;
-      --red: #c93645;
-      --red-light: #fff0f1;
-      --amber: #a96b0c;
-      --amber-light: #fff5df;
-      --blue: #2463a6;
-      --blue-light: #eaf3ff;
-      --shadow: 0 8px 28px rgba(25, 50, 65, .055);
-    }
-
-    * {
-      box-sizing: border-box;
-      margin: 0;
-      padding: 0;
-    }
-
-    body {
-      font-family: Inter, Arial, sans-serif;
-      background: var(--bg);
-      color: var(--text);
-      line-height: 1.6;
-    }
-
-    button, input, select {
-      font: inherit;
-    }
-
-    button {
-      cursor: pointer;
-    }
-
-    button:focus-visible, input:focus-visible {
-      outline: 3px solid rgba(8, 127, 85, .25);
-      outline-offset: 2px;
-    }
-
-    .container {
-      width: min(1120px, 92%);
-      margin: 0 auto;
-    }
-
-    header {
-      background: #fff;
-      border-bottom: 1px solid var(--border);
-    }
-
-    .navbar {
-      min-height: 76px;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      gap: 14px;
-    }
-
-    .brand {
-      display: flex;
-      align-items: center;
-      gap: 11px;
-      font-size: 15px;
-      font-weight: 800;
-      letter-spacing: -.3px;
-    }
-
-    .brand-icon {
-      width: 41px;
-      height: 41px;
-      border-radius: 12px;
-      background: var(--green);
-      display: grid;
-      place-items: center;
-      flex-shrink: 0;
-    }
-
-    .brand-icon svg {
-      width: 24px;
-      height: 24px;
-    }
-
-    .header-label {
-      color: var(--green);
-      background: var(--green-light);
-      padding: 7px 11px;
-      border-radius: 30px;
-      font-size: 10px;
-      font-weight: 800;
-      letter-spacing: .5px;
-    }
-
-    main {
-      padding: 38px 0 60px;
-    }
-
-    .hero {
-      text-align: center;
-      padding: 10px 0 28px;
-    }
-
-    .eyebrow {
-      color: var(--green);
-      text-transform: uppercase;
-      font-size: 11px;
-      font-weight: 800;
-      letter-spacing: 1.8px;
-      margin-bottom: 10px;
-    }
-
-    h1 {
-      font-size: clamp(28px, 5vw, 43px);
-      line-height: 1.2;
-      letter-spacing: -1.6px;
-      margin-bottom: 13px;
-    }
-
-    .hero p {
-      max-width: 660px;
-      margin: 0 auto;
-      color: var(--muted);
-      font-size: 14px;
-    }
-
-    .panel {
-      background: var(--card);
-      border: 1px solid var(--border);
-      border-radius: 17px;
-      padding: 24px;
-      box-shadow: var(--shadow);
-      margin-bottom: 20px;
-    }
-
-    .panel h2 {
-      font-size: 18px;
-      margin-bottom: 5px;
-    }
-
-    .muted {
-      color: var(--muted);
-      font-size: 13px;
-    }
-
-    .audit-form {
-      display: flex;
-      gap: 11px;
-      margin-top: 19px;
-    }
-
-    .audit-form input {
-      flex: 1;
-      width: 100%;
-      min-width: 0;
-      height: 49px;
-      padding: 0 14px;
-      border: 1px solid #d8e1e6;
-      border-radius: 10px;
-      color: var(--text);
-      background: white;
-    }
-
-    .audit-form input:focus {
-      border-color: var(--green);
-      outline: 3px solid rgba(8, 127, 85, .09);
-    }
-
-    .btn {
-      border: 0;
-      border-radius: 10px;
-      padding: 12px 17px;
-      min-height: 45px;
-      font-size: 12px;
-      font-weight: 800;
-      transition: background .2s, transform .2s;
-    }
-
-    .btn:active {
-      transform: translateY(1px);
-    }
-
-    .btn-primary {
-      background: var(--green);
-      color: #fff;
-    }
-
-    .btn-primary:hover {
-      background: var(--green-dark);
-    }
-
-    .btn-primary:disabled {
-      opacity: .65;
-      cursor: wait;
-    }
-
-    .btn-secondary {
-      background: #fff;
-      border: 1px solid var(--border);
-      color: var(--text);
-    }
-
-    .btn-secondary:hover {
-      background: #f4f7f8;
-    }
-
-    .notice {
-      margin-top: 16px;
-      border-radius: 10px;
-      padding: 13px 14px;
-      background: #f0f6fb;
-      color: #425f74;
-      font-size: 11px;
-      line-height: 1.7;
-    }
-
-    .hidden {
-      display: none !important;
-    }
-
-    .loading {
-      text-align: center;
-      padding: 25px;
-    }
-
-    .spinner {
-      width: 30px;
-      height: 30px;
-      border: 3px solid #dfeae5;
-      border-top-color: var(--green);
-      border-radius: 50%;
-      margin: 0 auto 13px;
-      animation: spin .8s linear infinite;
-    }
-
-    @keyframes spin {
-      to { transform: rotate(360deg); }
-    }
-
-    .section-heading {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      gap: 14px;
-      margin: 28px 0 15px;
-    }
-
-    .section-heading h2 {
-      font-size: 20px;
-      letter-spacing: -.4px;
-    }
-
-    .section-heading p {
-      font-size: 11px;
-      color: var(--muted);
-      margin-top: 3px;
-    }
-
-    .pill {
-      display: inline-block;
-      border-radius: 30px;
-      padding: 6px 10px;
-      background: #edf1f4;
-      color: #52616c;
-      font-size: 10px;
-      font-weight: 800;
-      white-space: normal;
-    }
-
-    .pill-good {
-      background: var(--green-light);
-      color: var(--green-dark);
-    }
-
-    .pill-warning {
-      background: var(--amber-light);
-      color: var(--amber);
-    }
-
-    .pill-bad {
-      background: var(--red-light);
-      color: var(--red);
-    }
-
-    .pill-info {
-      background: var(--blue-light);
-      color: var(--blue);
-    }
-
-    .overview {
-      display: grid;
-      grid-template-columns: 235px 1fr;
-      gap: 18px;
-    }
-
-    .score-card, .summary-card {
-      background: #fff;
-      border: 1px solid var(--border);
-      border-radius: 16px;
-      padding: 22px;
-      box-shadow: var(--shadow);
-    }
-
-    .score-card {
-      text-align: center;
-    }
-
-    .score-card h3 {
-      font-size: 13px;
-    }
-
-    .score-ring {
-      --angle: 0deg;
-      width: 140px;
-      height: 140px;
-      margin: 17px auto 12px;
-      display: grid;
-      place-items: center;
-      border-radius: 50%;
-      background: conic-gradient(var(--green) var(--angle), #e8edf0 0);
-      position: relative;
-    }
-
-    .score-ring::before {
-      content: "";
-      position: absolute;
-      width: 116px;
-      height: 116px;
-      border-radius: 50%;
-      background: white;
-    }
-
-    .score-number {
-      position: relative;
-      z-index: 1;
-      font-size: 36px;
-      font-weight: 800;
-      letter-spacing: -1px;
-    }
-
-    .score-caption {
-      color: var(--muted);
-      font-size: 10px;
-    }
-
-    .summary-card h3 {
-      font-size: 17px;
-      margin-bottom: 9px;
-    }
-
-    .summary-card p {
-      font-size: 12px;
-      color: var(--muted);
-      overflow-wrap: anywhere;
-    }
-
-    .summary-meta {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 8px;
-      margin-top: 17px;
-    }
-
-    .meta-chip {
-      background: #f2f5f7;
-      border-radius: 8px;
-      padding: 7px 9px;
-      font-size: 10px;
-      overflow-wrap: anywhere;
-    }
-
-    .metrics-grid {
-      display: grid;
-      grid-template-columns: repeat(3, minmax(0, 1fr));
-      gap: 15px;
-    }
-
-    .metric-card {
-      background: #fff;
-      border: 1px solid var(--border);
-      border-radius: 15px;
-      padding: 19px;
-      box-shadow: var(--shadow);
-      min-width: 0;
-    }
-
-    .metric-top {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      gap: 8px;
-      margin-bottom: 13px;
-    }
-
-    .metric-icon {
-      width: 39px;
-      height: 39px;
-      display: grid;
-      place-items: center;
-      background: var(--green-light);
-      border-radius: 11px;
-      font-size: 19px;
-    }
-
-    .metric-score {
-      font-size: 23px;
-      font-weight: 800;
-      letter-spacing: -.5px;
-    }
-
-    .metric-card h3 {
-      font-size: 13px;
-      margin-bottom: 7px;
-    }
-
-    .metric-card p {
-      color: var(--muted);
-      font-size: 11px;
-      overflow-wrap: anywhere;
-      min-height: 52px;
-    }
-
-    .progress-track {
-      height: 6px;
-      background: #edf1f3;
-      border-radius: 20px;
-      margin: 14px 0 11px;
-      overflow: hidden;
-    }
-
-    .progress-fill {
-      height: 100%;
-      width: 0;
-      background: var(--green);
-      border-radius: 20px;
-      transition: width .5s;
-    }
-
-    .metric-card .pill {
-      margin-top: 2px;
-    }
-
-    .actions-list {
-      display: grid;
-      gap: 11px;
-    }
-
-    .action-item {
-      display: flex;
-      align-items: flex-start;
-      gap: 12px;
-      border: 1px solid var(--border);
-      border-radius: 11px;
-      padding: 14px;
-    }
-
-    .action-dot {
-      width: 9px;
-      height: 9px;
-      margin-top: 6px;
-      border-radius: 50%;
-      background: var(--amber);
-      flex-shrink: 0;
-    }
-
-    .action-item h3 {
-      font-size: 12px;
-      margin-bottom: 4px;
-    }
-
-    .action-item p {
-      font-size: 11px;
-      color: var(--muted);
-    }
-
-    .report-actions {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 10px;
-      margin-top: 20px;
-    }
-
-    .report-footnote {
-      margin-top: 18px;
-      padding-top: 14px;
-      border-top: 1px solid var(--border);
-      font-size: 10px;
-      color: var(--muted);
-    }
-
-    footer {
-      background: #fff;
-      border-top: 1px solid var(--border);
-      text-align: center;
-      padding: 23px 0;
-      color: var(--muted);
-      font-size: 11px;
-    }
-
-    @media (max-width: 800px) {
-      .metrics-grid {
-        grid-template-columns: repeat(2, minmax(0, 1fr));
-      }
-
-      .overview {
-        grid-template-columns: 1fr;
-      }
-    }
-
-    @media (max-width: 560px) {
-      main {
-        padding-top: 25px;
-      }
-
-      .navbar {
-        min-height: 66px;
-      }
-
-      .brand {
-        font-size: 12px;
-      }
-
-      .brand-icon {
-        width: 35px;
-        height: 35px;
-      }
-
-      .header-label {
-        font-size: 9px;
-        padding: 6px 8px;
-      }
-
-      .panel {
-        padding: 18px;
-      }
-
-      .audit-form {
-        flex-direction: column;
-      }
-
-      .audit-form .btn {
-        width: 100%;
-      }
-
-      .metrics-grid {
-        grid-template-columns: 1fr;
-      }
-
-      .metric-card p {
-        min-height: 0;
-      }
-
-      .section-heading {
-        align-items: flex-start;
-        flex-direction: column;
-      }
-
-      .report-actions {
-        flex-direction: column;
-      }
-
-      .report-actions .btn {
-        width: 100%;
-      }
-    }
-
-    @media print {
-      body { background: #fff; }
-      header, footer, .audit-panel, .report-actions { display: none !important; }
-      main { padding: 0; }
-      .panel, .score-card, .summary-card, .metric-card { box-shadow: none; break-inside: avoid; }
-      .metrics-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
-    }
-  </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="theme-color" content="#6d28d9">
+<meta name="description" content="A colourful Shopify store health and performance auditor with actionable recommendations.">
+<title>StorePulse — Shopify Store Auditor</title>
+<link rel="icon" type="image/png" href="./favicon.png">
+<link rel="shortcut icon" type="image/png" href="./favicon.png">
+<link rel="apple-touch-icon" href="./favicon.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#f6f7ff;--surface:#fff;--ink:#191735;--muted:#77758f;--line:#e9e7f5;--purple:#6d28d9;--purple2:#8b5cf6;--blue:#3b82f6;--cyan:#22d3ee;--pink:#ec4899;--green:#10b981;--amber:#f59e0b;--red:#ef4444;--shadow:0 18px 55px rgba(49,35,105,.09)}
+*{box-sizing:border-box}html{scroll-behavior:smooth}body{margin:0;background:var(--bg);color:var(--ink);font-family:"DM Sans",sans-serif}button,input{font:inherit}button{cursor:pointer}.app{max-width:1320px;margin:auto;padding:24px}.topbar{display:flex;align-items:center;justify-content:space-between;gap:18px;margin-bottom:24px}.brand{display:flex;align-items:center;gap:12px}.logo{width:48px;height:48px;border-radius:16px;background:linear-gradient(135deg,#6d28d9,#3b82f6 70%,#22d3ee);display:grid;place-items:center;box-shadow:0 9px 22px #6d28d933}.logo svg{width:28px;height:28px}.brand-name{font:800 21px Manrope,sans-serif;letter-spacing:-.7px}.brand-name span{color:var(--purple)}.brand-sub{font-size:12px;color:var(--muted);margin-top:2px}.top-actions{display:flex;gap:10px;align-items:center}.pill{display:flex;align-items:center;gap:7px;padding:9px 13px;border:1px solid var(--line);background:#fff;border-radius:999px;color:#585570;font-size:12px;font-weight:700}.dot{width:7px;height:7px;background:var(--green);border-radius:50%}.hero{position:relative;overflow:hidden;border-radius:28px;padding:36px;color:#fff;background:linear-gradient(115deg,#4c1d95 0%,#6d28d9 42%,#2563eb 100%);box-shadow:0 22px 55px #5426b52c}.hero:before,.hero:after{content:"";position:absolute;border-radius:50%;pointer-events:none}.hero:before{width:330px;height:330px;right:-65px;top:-155px;background:#ffffff12;border:1px solid #ffffff20}.hero:after{width:210px;height:210px;right:140px;bottom:-155px;background:#22d3ee24}.hero-content{position:relative;z-index:1;max-width:790px}.eyebrow{font-size:11px;text-transform:uppercase;letter-spacing:1.8px;font-weight:800;color:#ddd6fe;display:flex;align-items:center;gap:9px}.eyebrow:before{content:"";height:2px;width:22px;background:#67e8f9;border-radius:2px}.hero h1{font:800 clamp(30px,4.2vw,46px)/1.12 Manrope,sans-serif;letter-spacing:-1.7px;margin:15px 0 12px}.hero p{color:#ede9fe;line-height:1.65;font-size:15px;max-width:620px;margin:0}.scan-form{display:flex;gap:10px;max-width:760px;margin-top:26px;background:#fff;padding:7px;border-radius:16px;box-shadow:0 12px 30px #28105b30}.url-wrap{display:flex;align-items:center;gap:10px;flex:1;min-width:0;padding:0 12px;color:#8b87a4}.url-wrap input{border:0;outline:0;width:100%;min-width:0;color:var(--ink);font-size:14px;padding:10px 0;background:transparent}.url-wrap input::placeholder{color:#a5a1b7}.primary{border:0;border-radius:12px;padding:13px 20px;color:white;background:linear-gradient(135deg,#7c3aed,#4f46e5);font-weight:800;box-shadow:0 7px 16px #6d28d933;transition:transform .2s,filter .2s}.primary:hover{transform:translateY(-1px);filter:brightness(1.07)}.primary:disabled{opacity:.65;cursor:wait;transform:none}.hero-note{font-size:11px;color:#ddd6fe;margin-top:13px}.hero-note strong{color:#fff}.main-grid{display:grid;grid-template-columns:minmax(0,1.65fr) minmax(270px,.85fr);gap:20px;margin-top:22px}.panel{background:var(--surface);border:1px solid #eeecf7;border-radius:22px;box-shadow:var(--shadow)}.panel-pad{padding:23px}.section-head{display:flex;justify-content:space-between;align-items:flex-start;gap:15px;margin-bottom:19px}.section-title{font:800 17px Manrope,sans-serif;letter-spacing:-.4px}.section-desc{font-size:12px;color:var(--muted);margin-top:5px;line-height:1.5}.tiny-label{font-size:10px;text-transform:uppercase;letter-spacing:1.1px;font-weight:800;color:#9894ad}.score-layout{display:grid;grid-template-columns:190px 1fr;align-items:center;gap:20px}.score-ring{width:180px;height:180px;margin:auto;position:relative;display:grid;place-items:center}.score-ring svg{position:absolute;inset:0;width:100%;height:100%;transform:rotate(-90deg)}.score-ring circle{fill:none;stroke-width:11}.ring-track{stroke:#f0edfa}.ring-value{stroke:url(#scoreGradient);stroke-linecap:round;stroke-dasharray:440;stroke-dashoffset:110;transition:stroke-dashoffset .7s ease}.score-number{text-align:center;position:relative}.score-number strong{display:block;font:800 43px Manrope,sans-serif;letter-spacing:-2px}.score-number span{font-size:11px;color:var(--muted);font-weight:700}.score-summary h3{font:800 20px Manrope,sans-serif;margin:0 0 8px;letter-spacing:-.6px}.score-summary p{font-size:13px;line-height:1.65;color:var(--muted);margin:0 0 16px}.score-chips{display:flex;flex-wrap:wrap;gap:7px}.score-chip{font-size:11px;font-weight:800;border-radius:999px;padding:7px 10px;background:#f2edff;color:#6d28d9}.score-chip.good{background:#e8fbf3;color:#07865e}.score-chip.warn{background:#fff6df;color:#a86b00}.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:11px;margin-top:20px}.stat{padding:15px;border:1px solid var(--line);border-radius:15px;background:linear-gradient(135deg,#fff,#fbfaff)}.stat-top{display:flex;justify-content:space-between;align-items:center;color:var(--muted);font-size:11px;font-weight:700}.stat-icon{width:29px;height:29px;display:grid;place-items:center;border-radius:10px;font-size:14px}.stat strong{display:block;font:800 24px Manrope,sans-serif;margin-top:10px;letter-spacing:-.8px}.stat small{display:block;color:var(--muted);font-size:10px;margin-top:3px}.i-purple{background:#f0e9ff;color:#7c3aed}.i-blue{background:#e8f1ff;color:#2563eb}.i-pink{background:#ffe8f4;color:#db2777}.side-stack{display:flex;flex-direction:column;gap:20px}.quick-card{padding:22px;background:linear-gradient(145deg,#fff,#f5f1ff)}.quick-card h3{font:800 16px Manrope,sans-serif;margin:0 0 7px}.quick-card p{font-size:12px;line-height:1.6;color:var(--muted);margin:0}.quick-list{list-style:none;padding:0;margin:17px 0 0;display:grid;gap:13px}.quick-list li{display:flex;gap:10px;align-items:flex-start;font-size:12px;line-height:1.5;color:#4e4b69}.check{flex:0 0 20px;height:20px;border-radius:7px;display:grid;place-items:center;background:#e6fbf3;color:#059669;font-size:12px;font-weight:900}.scan-meta{font-size:11px;color:var(--muted);margin-top:16px;padding-top:14px;border-top:1px solid var(--line)}.category-section,.findings-section{margin-top:22px}.category-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:13px}.category{border:1px solid var(--line);border-radius:17px;padding:17px;background:#fff;min-width:0;transition:transform .2s,box-shadow .2s}.category:hover{transform:translateY(-2px);box-shadow:0 12px 25px #38226a0c}.category-top{display:flex;align-items:center;justify-content:space-between;gap:8px}.cat-icon{width:37px;height:37px;border-radius:12px;display:grid;place-items:center;font-size:17px}.cat-score{font:800 16px Manrope,sans-serif}.category h3{font:800 13px Manrope,sans-serif;margin:13px 0 6px}.category p{font-size:11px;line-height:1.5;color:var(--muted);margin:0;min-height:33px}.progress{height:6px;background:#f0eef7;border-radius:999px;overflow:hidden;margin-top:14px}.progress span{height:100%;display:block;border-radius:999px;background:linear-gradient(90deg,#8b5cf6,#3b82f6)}.cat-bottom{display:flex;align-items:center;justify-content:space-between;gap:6px;margin-top:12px}.status{font-size:10px;font-weight:800;border-radius:999px;padding:6px 8px;white-space:nowrap}.status.good{background:#e8fbf3;color:#07865e}.status.warn{background:#fff5dc;color:#a76b00}.status.bad{background:#ffe9ed;color:#c4314b}.status.info{background:#eee9ff;color:#6d28d9}.findings-head{display:flex;justify-content:space-between;align-items:center;gap:12px;margin-bottom:15px}.filter-row{display:flex;gap:7px;flex-wrap:wrap}.filter{border:1px solid var(--line);background:#fff;color:#77738f;border-radius:999px;padding:7px 11px;font-size:11px;font-weight:800}.filter.active{background:#ede9fe;color:#6d28d9;border-color:#ddd6fe}.findings{display:grid;gap:10px}.finding{display:flex;align-items:flex-start;gap:13px;padding:16px;border:1px solid var(--line);border-radius:16px;background:#fff}.finding-symbol{width:34px;height:34px;flex:0 0 34px;border-radius:11px;display:grid;place-items:center;font-weight:900}.finding-body{flex:1;min-width:0}.finding-body h4{font:800 13px Manrope,sans-serif;margin:1px 0 5px}.finding-body p{font-size:12px;line-height:1.6;color:var(--muted);margin:0}.finding-tag{font-size:10px;font-weight:800;border-radius:999px;padding:6px 8px;white-space:nowrap}.priority-high .finding-symbol{background:#ffe8ec;color:#dc3654}.priority-medium .finding-symbol{background:#fff3d6;color:#a76b00}.priority-low .finding-symbol{background:#e8f2ff;color:#2563eb}.priority-info .finding-symbol{background:#eee9ff;color:#6d28d9}.priority-high .finding-tag{background:#ffe8ec;color:#c4314b}.priority-medium .finding-tag{background:#fff3d6;color:#a76b00}.priority-low .finding-tag{background:#e8f2ff;color:#2563eb}.priority-info .finding-tag{background:#eee9ff;color:#6d28d9}.empty{padding:25px;text-align:center;color:var(--muted);font-size:13px}.footer{display:flex;justify-content:space-between;align-items:center;gap:15px;margin:24px 0 8px;color:#9692aa;font-size:11px}.footer-brand{font:800 12px Manrope,sans-serif;color:#696481}.footer-actions{display:flex;gap:8px;flex-wrap:wrap}.secondary{border:1px solid var(--line);background:#fff;color:#625e7b;padding:10px 13px;border-radius:11px;font-size:11px;font-weight:800}.secondary:hover{border-color:#c4b5fd;color:#6d28d9}.loader{display:none;align-items:center;gap:9px;font-size:12px;font-weight:700;color:#6d28d9;margin-top:12px}.loader.show{display:flex}.spinner{width:15px;height:15px;border:2px solid #ddd6fe;border-top-color:#6d28d9;border-radius:50%;animation:spin .7s linear infinite}@keyframes spin{to{transform:rotate(360deg)}}.toast{position:fixed;bottom:20px;left:50%;transform:translate(-50%,20px);opacity:0;pointer-events:none;background:#211b42;color:#fff;border-radius:12px;padding:12px 16px;font-size:12px;box-shadow:var(--shadow);transition:.25s;z-index:10}.toast.show{opacity:1;transform:translate(-50%,0)}.hidden{display:none!important}
+@media(max-width:900px){.main-grid{grid-template-columns:1fr}.side-stack{display:grid;grid-template-columns:1fr 1fr}.category-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.score-layout{grid-template-columns:170px 1fr}.score-ring{width:160px;height:160px}}
+@media(max-width:600px){.app{padding:13px}.topbar{margin-bottom:15px}.brand-name{font-size:18px}.brand-sub{font-size:10px}.top-actions .pill{display:none}.hero{padding:25px 20px;border-radius:22px}.hero h1{font-size:31px}.hero p{font-size:13px}.scan-form{flex-direction:column;padding:8px}.url-wrap{min-height:40px}.scan-form .primary{width:100%}.panel-pad{padding:17px}.score-layout{grid-template-columns:1fr;text-align:center;gap:14px}.score-summary p{max-width:420px;margin-left:auto;margin-right:auto}.score-chips{justify-content:center}.stats{gap:7px}.stat{padding:11px}.stat strong{font-size:21px}.stat-top{font-size:10px}.stat-icon{width:25px;height:25px}.side-stack{grid-template-columns:1fr}.category-grid{grid-template-columns:1fr 1fr;gap:9px}.category{padding:13px}.category h3{font-size:12px}.category p{font-size:10px}.cat-icon{width:32px;height:32px}.cat-score{font-size:14px}.status{font-size:9px;padding:5px 6px}.finding{padding:13px;gap:10px}.finding-tag{display:none}.footer{align-items:flex-start;flex-direction:column}.findings-head{align-items:flex-start;flex-direction:column}}
+@media print{body{background:#fff}.app{max-width:none;padding:0}.hero{box-shadow:none;print-color-adjust:exact;-webkit-print-color-adjust:exact}.scan-form,.top-actions,.footer-actions,.filter-row{display:none!important}.panel,.category{box-shadow:none;break-inside:avoid}.main-grid{grid-template-columns:1.5fr 1fr}.category-grid{grid-template-columns:repeat(3,1fr)}.finding{break-inside:avoid}}
+</style>
 </head>
-
 <body>
-  <header>
-    <div class="container navbar">
-      <div class="brand">
-        <div class="brand-icon">
-          <svg viewBox="0 0 24 24" fill="none" stroke="white"
-               stroke-width="2.5" stroke-linecap="round"
-               stroke-linejoin="round" aria-hidden="true">
-            <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"></polyline>
-          </svg>
-        </div>
-        <span>Shopify Health Monitor</span>
+<div class="app">
+  <header class="topbar">
+    <div class="brand">
+      <div class="logo" aria-label="StorePulse logo">
+        <svg viewBox="0 0 32 32" fill="none" aria-hidden="true"><path d="M4 18h5l3-9 5 15 3-10 2 4h6" stroke="white" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round"/><circle cx="25.5" cy="8" r="3" fill="#67E8F9"/></svg>
       </div>
-      <span class="header-label">STORE AUDITOR</span>
+      <div><div class="brand-name">Store<span>Pulse</span></div><div class="brand-sub">Shopify Health & Performance Auditor</div></div>
     </div>
+    <div class="top-actions"><div class="pill"><span class="dot"></span> Audit workspace</div><div class="pill">✦ Actionable insights</div></div>
   </header>
 
-  <main class="container">
-    <section class="hero">
-      <div class="eyebrow">Store Performance Toolkit</div>
-      <h1>Shopify Store Health Auditor</h1>
-      <p>
-        Review your store's performance, mobile experience, SEO,
-        accessibility, and essential customer journeys.
-      </p>
-    </section>
-
-    <section class="panel audit-panel">
-      <h2>Analyze your store</h2>
-      <p class="muted">
-        Enter your public store URL to begin your review.
-      </p>
-
-      <form class="audit-form" id="auditForm">
-        <input
-          id="storeUrl"
-          type="url"
-          placeholder="https://yourstore.com"
-          aria-label="Store website URL"
-          autocomplete="url"
-          required
-        >
-        <button class="btn btn-primary" id="auditButton" type="submit">
-          Run Store Audit
-        </button>
+  <section class="hero">
+    <div class="hero-content">
+      <div class="eyebrow">Your store, in its best shape</div>
+      <h1>Find the friction.<br>Grow with confidence.</h1>
+      <p>Review your storefront, discover improvement opportunities, and get practical next steps to help make your Shopify store faster, easier to use, and more trustworthy.</p>
+      <form class="scan-form" id="auditForm">
+        <div class="url-wrap"><span>↗</span><input id="storeUrl" type="url" placeholder="your-store.com or mystore.myshopify.com" aria-label="Store website URL" required></div>
+        <button class="primary" id="scanBtn" type="submit">✦ Analyse store</button>
       </form>
-
-      <div class="notice">
-        <strong>How this works:</strong> Performance, SEO, accessibility,
-        and best-practice scores are requested from Google PageSpeed Insights.
-        Results depend on service availability. Checkout, payment configuration,
-        and some storefront details require manual checks because this public
-        tool cannot access your private Shopify admin.
-      </div>
-    </section>
-
-    <section class="panel loading hidden" id="loadingBox" aria-live="polite">
-      <div class="spinner"></div>
-      <strong id="loadingTitle">Reviewing your store...</strong>
-      <p class="muted" id="loadingText">
-        This can take a little while. Please keep this page open.
-      </p>
-    </section>
-
-    <section id="errorBox" class="panel hidden" role="alert">
-      <h2>We couldn't complete the audit</h2>
-      <p class="muted" id="errorMessage"></p>
-      <p class="muted" style="margin-top:8px">
-        Check the URL and your internet connection, then try again.
-        You can also retry later if the analysis service is temporarily
-        unavailable.
-      </p>
-      <button class="btn btn-secondary" id="retryButton" style="margin-top:15px">
-        Try Again
-      </button>
-    </section>
-
-    <section id="results" class="hidden">
-      <div class="section-heading">
-        <div>
-          <h2>Audit Overview</h2>
-          <p id="auditDate"></p>
-        </div>
-        <span class="pill pill-info" id="overallStatus">Review complete</span>
-      </div>
-
-      <div class="overview">
-        <div class="score-card">
-          <h3>Verified Checks Score</h3>
-          <div class="score-ring" id="scoreRing">
-            <span class="score-number" id="overallScore">—</span>
-          </div>
-          <div class="score-caption" id="scoreCaption">
-            Based on available numeric checks
-          </div>
-        </div>
-
-        <div class="summary-card">
-          <h3>Your Store Summary</h3>
-          <p id="summaryText"></p>
-          <div class="summary-meta">
-            <span class="meta-chip" id="storeAddress"></span>
-            <span class="meta-chip" id="verifiedCount"></span>
-            <span class="meta-chip" id="manualCount"></span>
-          </div>
-        </div>
-      </div>
-
-      <div class="section-heading">
-        <div>
-          <h2>Health Check Results</h2>
-          <p>Unverified checks are excluded from the score.</p>
-        </div>
-      </div>
-
-      <div class="metrics-grid" id="metricsGrid"></div>
-
-      <div class="section-heading">
-        <div>
-          <h2>Recommended Next Steps</h2>
-          <p>Use these suggestions to investigate your store.</p>
-        </div>
-      </div>
-
-      <div class="panel">
-        <div class="actions-list" id="actionsList"></div>
-
-        <div class="report-actions">
-          <button class="btn btn-primary" id="downloadJson">
-            Download JSON Report
-          </button>
-          <button class="btn btn-secondary" id="savePdf">
-            Print / Save as PDF
-          </button>
-          <button class="btn btn-secondary" id="anotherAudit">
-            Audit Another Store
-          </button>
-        </div>
-
-        <div class="report-footnote">
-          This report is an initial public-site review, not a guarantee of
-          sales, security, checkout reliability, or complete Shopify compliance.
-          Lighthouse scores can vary by device, network, and time.
-        </div>
-      </div>
-    </section>
-  </main>
-
-  <footer>
-    <div class="container">
-      Shopify Store Health & Performance Auditor
-      <br>
-      An independent tool. Not affiliated with or endorsed by Shopify.
+      <div class="hero-note"><strong>Accepted:</strong> Shopify links, custom domains, and other public store URLs — with or without https://.</div>
+      <div class="loader" id="loader"><span class="spinner"></span><span id="loaderText">Reviewing your storefront…</span></div>
     </div>
-  </footer>
-
-  <script>
-    const $ = id => document.getElementById(id);
-
-    let currentReport = null;
-    let lastSubmittedUrl = "";
-
-    const PSI_ENDPOINT =
-      "https://www.googleapis.com/pagespeedonline/v5/runPagespeed";
-
-    function normalizeUrl(value) {
-      let url;
-
-      try {
-        url = new URL(value.trim());
-      } catch {
-        throw new Error(
-          "Please enter a valid website address, such as https://yourstore.com."
-        );
-      }
-
-      if (!["http:", "https:"].includes(url.protocol)) {
-        throw new Error("Please use an HTTP or HTTPS website address.");
-      }
-
-      if (!url.hostname.includes(".") || url.hostname.includes(" ")) {
-        throw new Error("Please enter a complete domain name.");
-      }
-
-      if (url.username || url.password) {
-        throw new Error("Website addresses must not contain login credentials.");
-      }
-
-      return url;
-    }
-
-    function metric(title, icon, score, status, description, source) {
-      return {
-        title,
-        icon,
-        score,
-        status,
-        description,
-        source: source || "Manual review"
-      };
-    }
-
-    function validScore(value) {
-      return typeof value === "number" &&
-        Number.isFinite(value) &&
-        value >= 0 &&
-        value <= 100;
-    }
-
-    async function getPageSpeedData(url, strategy) {
-      const params = new URLSearchParams();
-      params.set("url", url);
-      params.set("strategy", strategy);
-
-      [
-        "performance",
-        "accessibility",
-        "best-practices",
-        "seo"
-      ].forEach(category => params.append("category", category));
-
-      const response = await fetch(
-        PSI_ENDPOINT + "?" + params.toString(),
-        { method: "GET" }
-      );
-
-      if (!response.ok) {
-        let reason = "Google PageSpeed Insights returned HTTP " + response.status + ".";
-
-        try {
-          const body = await response.json();
-          if (body.error && body.error.message) {
-            reason = body.error.message;
-          }
-        } catch {
-          // Keep the HTTP error message.
-        }
-
-        throw new Error(reason);
-      }
-
-      const data = await response.json();
-
-      if (!data.lighthouseResult) {
-        throw new Error("The performance service returned no Lighthouse results.");
-      }
-
-      return data;
-    }
-
-    function getCategoryScore(data, category) {
-      const value =
-        data &&
-        data.lighthouseResult &&
-        data.lighthouseResult.categories &&
-        data.lighthouseResult.categories[category] &&
-        data.lighthouseResult.categories[category].score;
-
-      if (typeof value !== "number") return null;
-      return Math.round(value * 100);
-    }
-
-    function makePsiMetric(data, category, title, icon, description) {
-      const score = getCategoryScore(data, category);
-
-      if (score === null) {
-        return metric(
-          title,
-          icon,
-          null,
-          "Not available",
-          "The analysis service did not provide a usable score for this category.",
-          "Google PageSpeed Insights"
-        );
-      }
-
-      return metric(
-        title,
-        icon,
-        score,
-        score >= 90 ? "Good" : score >= 50 ? "Needs improvement" : "Poor",
-        description,
-        "Google PageSpeed Insights"
-      );
-    }
-
-    async function runAudit(event) {
-      if (event) event.preventDefault();
-
-      let url;
-
-      try {
-        url = normalizeUrl($("storeUrl").value);
-      } catch (error) {
-        alert(error.message);
-        return;
-      }
-
-      lastSubmittedUrl = url.href;
-
-      $("errorBox").classList.add("hidden");
-      $("results").classList.add("hidden");
-      $("loadingBox").classList.remove("hidden");
-      $("auditButton").disabled = true;
-      $("auditButton").textContent = "Analyzing...";
-
-      $("loadingTitle").textContent = "Analyzing your store";
-      $("loadingText").textContent =
-        "Requesting mobile and desktop analysis from Google PageSpeed Insights. This may take a minute.";
-
-      try {
-        const results = await Promise.allSettled([
-          getPageSpeedData(url.href, "mobile"),
-          getPageSpeedData(url.href, "desktop")
-        ]);
-
-        const mobileResult = results[0];
-        const desktopResult = results[1];
-
-        if (
-          mobileResult.status === "rejected" &&
-          desktopResult.status === "rejected"
-        ) {
-          throw new Error(
-            "Neither mobile nor desktop analysis completed. " +
-            "The service may be temporarily unavailable, the domain may be inaccessible, " +
-            "or its usage limit may have been reached. Details: " +
-            String(mobileResult.reason.message || mobileResult.reason)
-          );
-        }
-
-        const mobileData =
-          mobileResult.status === "fulfilled" ? mobileResult.value : null;
-
-        const desktopData =
-          desktopResult.status === "fulfilled" ? desktopResult.value : null;
-
-        const metrics = [];
-
-        metrics.push(metric(
-          "Secure Connection",
-          "🔒",
-          url.protocol === "https:" ? 100 : 0,
-          url.protocol === "https:" ? "HTTPS address" : "HTTP address",
-          url.protocol === "https:"
-            ? "The entered URL uses HTTPS. This does not independently verify every aspect of the site's security."
-            : "The entered URL uses HTTP. Configure HTTPS before customers submit sensitive information.",
-          "Entered URL"
-        ));
-
-        metrics.push(metric(
-          "Shopify Platform",
-          "🛍️",
-          null,
-          url.hostname.endsWith("myshopify.com")
-            ? "Shopify domain format"
-            : "Platform not confirmed",
-          url.hostname.endsWith("myshopify.com")
-            ? "The address uses a myshopify.com hostname. This format alone does not confirm the store is active or configured correctly."
-            : "A custom domain may be used with Shopify, but this tool cannot confirm the underlying platform from the domain name alone.",
-          "Domain format"
-        ));
-
-        metrics.push(metric(
-          "Website Response",
-          "🌐",
-          null,
-          "See PageSpeed result",
-          "The PageSpeed service's response determines whether it could analyze the public website. A browser-side request is not used to guess the result.",
-          "PageSpeed Insights"
-        ));
-
-        if (mobileData) {
-          metrics.push(makePsiMetric(
-            mobileData,
-            "performance",
-            "Mobile Performance",
-            "⚡",
-            "Lighthouse performance score for the mobile simulation. This is a lab result, not a direct measurement of every visitor's experience."
-          ));
-
-          metrics.push(makePsiMetric(
-            mobileData,
-            "seo",
-            "SEO Basics",
-            "🔎",
-            "Lighthouse checks for selected SEO fundamentals. This is not a complete SEO audit or a ranking prediction."
-          ));
-
-          metrics.push(makePsiMetric(
-            mobileData,
-            "accessibility",
-            "Accessibility",
-            "♿",
-            "Automated accessibility checks can identify some problems but cannot find every accessibility barrier."
-          ));
-
-          metrics.push(makePsiMetric(
-            mobileData,
-            "best-practices",
-            "Web Best Practices",
-            "✅",
-            "Automated Lighthouse checks for selected browser and web-development best practices."
-          ));
-        } else {
-          metrics.push(metric(
-            "Mobile Performance",
-            "⚡",
-            null,
-            "Could not analyze",
-            "Mobile analysis failed. Try again later or run the store directly through PageSpeed Insights.",
-            "Google PageSpeed Insights"
-          ));
-
-          metrics.push(metric(
-            "SEO Basics",
-            "🔎",
-            null,
-            "Could not analyze",
-            "Mobile analysis did not return SEO results. This does not mean your store has an SEO problem.",
-            "Google PageSpeed Insights"
-          ));
-
-          metrics.push(metric(
-            "Accessibility",
-            "♿",
-            null,
-            "Could not analyze",
-            "Mobile analysis did not return accessibility results.",
-            "Google PageSpeed Insights"
-          ));
-
-          metrics.push(metric(
-            "Web Best Practices",
-            "✅",
-            null,
-            "Could not analyze",
-            "Mobile analysis did not return best-practices results.",
-            "Google PageSpeed Insights"
-          ));
-        }
-
-        if (desktopData) {
-          metrics.push(makePsiMetric(
-            desktopData,
-            "performance",
-            "Desktop Performance",
-            "🖥️",
-            "Lighthouse performance score for the desktop simulation. Lab scores can vary between runs."
-          ));
-        } else {
-          metrics.push(metric(
-            "Desktop Performance",
-            "🖥️",
-            null,
-            "Could not analyze",
-            "Desktop analysis did not complete. The rest of the report may still be useful.",
-            "Google PageSpeed Insights"
-          ));
-        }
-
-        metrics.push(metric(
-          "Checkout & Payments",
-          "🛒",
-          null,
-          "Manual check required",
-          "This public tool cannot access your private Shopify checkout or payment settings. Test the customer journey through Shopify using its supported test procedures.",
-          "Manual review"
-        ));
-
-        metrics.push(metric(
-          "Products & Shipping",
-          "📦",
-          null,
-          "Manual check required",
-          "Check product photos, prices, variants, inventory, shipping charges, delivery estimates, and return policy links on your store.",
-          "Manual review"
-        ));
-
-        const scored = metrics.filter(item => validScore(item.score));
-
-        const average = scored.length
-          ? Math.round(
-              scored.reduce((sum, item) => sum + item.score, 0) / scored.length
-            )
-          : null;
-
-        currentReport = {
-          storeUrl: url.href,
-          auditedAt: new Date().toISOString(),
-          score: average,
-          scoredChecks: scored.length,
-          totalChecks: metrics.length,
-          mobileAnalysisAvailable: Boolean(mobileData),
-          desktopAnalysisAvailable: Boolean(desktopData),
-          checks: metrics,
-          limitations: [
-            "A Lighthouse score is a lab result, not a guarantee of real-user performance.",
-            "Checkout and payment settings are not verified by this public browser tool.",
-            "Automated SEO and accessibility checks do not replace a complete expert review.",
-            "A score is calculated only from checks that returned a numeric result."
-          ]
-        };
-
-        renderReport(currentReport);
-
-        $("loadingBox").classList.add("hidden");
-        $("results").classList.remove("hidden");
-        $("results").scrollIntoView({ behavior: "smooth", block: "start" });
-
-      } catch (error) {
-        $("loadingBox").classList.add("hidden");
-        $("errorBox").classList.remove("hidden");
-        $("errorMessage").textContent =
-          error.message ||
-          "The audit could not be completed. Please try again later.";
-      } finally {
-        $("auditButton").disabled = false;
-        $("auditButton").textContent = "Run Store Audit";
-      }
-    }
-
-    function statusClass(status, score) {
-      if (validScore(score)) {
-        if (score >= 90) return "pill-good";
-        if (score >= 50) return "pill-warning";
-        return "pill-bad";
-      }
-
-      const text = status.toLowerCase();
-
-      if (text.includes("https address") || text === "good") {
-        return "pill-good";
-      }
-
-      if (text.includes("poor") || text.includes("http address")) {
-        return "pill-bad";
-      }
-
-      if (text.includes("manual") || text.includes("improvement")) {
-        return "pill-warning";
-      }
-
-      return "pill-info";
-    }
-
-    function renderReport(report) {
-      const scored = report.checks.filter(item => validScore(item.score));
-      const manual = report.checks.filter(item => !validScore(item.score));
-
-      $("auditDate").textContent =
-        "Report generated " + new Date(report.auditedAt).toLocaleString();
-
-      $("storeAddress").textContent = "Store: " + report.storeUrl;
-      $("verifiedCount").textContent = "Numeric scores: " + scored.length;
-      $("manualCount").textContent = "Manual / unavailable: " + manual.length;
-
-      $("overallScore").textContent =
-        report.score === null ? "N/A" : report.score;
-
-      $("scoreRing").style.setProperty(
-        "--angle",
-        (report.score === null ? 0 : report.score * 3.6) + "deg"
-      );
-
-      $("scoreCaption").textContent = report.score === null
-        ? "No numeric checks available"
-        : "Average of " + scored.length + " numeric checks";
-
-      $("overallStatus").textContent =
-        report.score === null
-          ? "Insufficient data"
-          : report.score >= 90
-            ? "Strong measured scores"
-            : report.score >= 50
-              ? "Improvements may help"
-              : "Review measured results";
-
-      $("summaryText").textContent =
-        "The review produced " + report.checks.length +
-        " check results, including " + scored.length +
-        " numeric scores and " + manual.length +
-        " items that require manual review or could not be analyzed. " +
-        "Unverified checks are excluded from the average. " +
-        "Review the details below before making changes to your store.";
-
-      renderMetrics(report.checks);
-      renderActions(report.checks);
-    }
-
-    function renderMetrics(checks) {
-      const grid = $("metricsGrid");
-      grid.replaceChildren();
-
-      checks.forEach(check => {
-        const card = document.createElement("article");
-        card.className = "metric-card";
-
-        const top = document.createElement("div");
-        top.className = "metric-top";
-
-        const icon = document.createElement("div");
-        icon.className = "metric-icon";
-        icon.textContent = check.icon;
-        icon.setAttribute("aria-hidden", "true");
-
-        const score = document.createElement("div");
-        score.className = "metric-score";
-        score.textContent = validScore(check.score)
-          ? check.score + "/100"
-          : "N/A";
-
-        top.append(icon, score);
-
-        const title = document.createElement("h3");
-        title.textContent = check.title;
-
-        const description = document.createElement("p");
-        description.textContent = check.description;
-
-        const track = document.createElement("div");
-        track.className = "progress-track";
-        track.setAttribute("aria-hidden", "true");
-
-        const fill = document.createElement("div");
-        fill.className = "progress-fill";
-        fill.style.width = validScore(check.score) ? check.score + "%" : "0%";
-
-        if (validScore(check.score) && check.score < 50) {
-          fill.style.background = "var(--red)";
-        } else if (validScore(check.score) && check.score < 90) {
-          fill.style.background = "#d99a27";
-        }
-
-        track.appendChild(fill);
-
-        const badge = document.createElement("span");
-        badge.className = "pill " + statusClass(check.status, check.score);
-        badge.textContent = check.status;
-
-        card.append(top, title, description, track, badge);
-        grid.appendChild(card);
-      });
-    }
-
-    function renderActions(checks) {
-      const list = $("actionsList");
-      list.replaceChildren();
-
-      const actions = [];
-
-      const performance = checks.filter(item =>
-        item.title.includes("Performance") && validScore(item.score)
-      );
-
-      performance.forEach(item => {
-        if (item.score < 90) {
-          actions.push({
-            title: "Improve " + item.title.toLowerCase(),
-            text: "Open PageSpeed Insights recommendations for this device category and address the highest-impact opportunities first."
-          });
-        }
-      });
-
-      const seo = checks.find(item => item.title === "SEO Basics");
-      if (!seo || !validScore(seo.score) || seo.score < 90) {
-        actions.push({
-          title: "Review SEO fundamentals",
-          text: "Check page titles, descriptions, canonical URLs, indexing settings, image alt text, and Search Console reports."
-        });
-      }
-
-      const accessibility = checks.find(item => item.title === "Accessibility");
-      if (!accessibility || !validScore(accessibility.score) || accessibility.score < 90) {
-        actions.push({
-          title: "Review accessibility",
-          text: "Check keyboard navigation, form labels, contrast, headings, image descriptions, and usability with assistive technology."
-        });
-      }
-
-      actions.push({
-        title: "Test checkout and payment methods",
-        text: "Use Shopify's supported test procedures to review cart behavior, shipping rates, taxes, discounts, and payment flow."
-      });
-
-      actions.push({
-        title: "Review products and shipping details",
-        text: "Verify product images, variants, prices, stock status, shipping policies, delivery estimates, and returns information."
-      });
-
-      actions.push({
-        title: "Repeat the test after changes",
-        text: "Run the audit again after updating your theme or apps. Compare results under similar conditions."
-      });
-
-      actions.forEach(action => {
-        const row = document.createElement("div");
-        row.className = "action-item";
-
-        const dot = document.createElement("div");
-        dot.className = "action-dot";
-
-        const content = document.createElement("div");
-        const title = document.createElement("h3");
-        const text = document.createElement("p");
-
-        title.textContent = action.title;
-        text.textContent = action.text;
-
-        content.append(title, text);
-        row.append(dot, content);
-        list.appendChild(row);
-      });
-    }
-
-    function downloadJson() {
-      if (!currentReport) {
-        alert("Please run an audit first.");
-        return;
-      }
-
-      const blob = new Blob(
-        [JSON.stringify(currentReport, null, 2)],
-        { type: "application/json;charset=utf-8" }
-      );
-
-      const url = URL.createObjectURL(blob);
-      const link = document.createElement("a");
-
-      link.href = url;
-      link.download = "shopify-store-health-report.json";
-      document.body.appendChild(link);
-      link.click();
-      link.remove();
-
-      setTimeout(() => URL.revokeObjectURL(url), 1000);
-    }
-
-    function savePdf() {
-      if (!currentReport) {
-        alert("Please run an audit first.");
-        return;
-      }
-
-      window.print();
-    }
-
-    function resetAudit() {
-      $("results").classList.add("hidden");
-      $("errorBox").classList.add("hidden");
-      $("storeUrl").value = "";
-      $("storeUrl").focus();
-      window.scrollTo({ top: 0, behavior: "smooth" });
-    }
-
-    $("auditForm").addEventListener("submit", runAudit);
-
-    $("retryButton").addEventListener("click", () => {
-      $("storeUrl").value = lastSubmittedUrl;
-      runAudit();
-    });
-
-    $("downloadJson").addEventListener("click", downloadJson);
-    $("savePdf").addEventListener("click", savePdf);
-    $("anotherAudit").addEventListener("click", resetAudit);
-  </script>
+  </section>
+
+  <div class="main-grid">
+    <section class="panel panel-pad">
+      <div class="section-head"><div><div class="section-title">Store health overview</div><div class="section-desc" id="reportSubtitle">Your audit summary and the next best steps.</div></div><span class="tiny-label" id="reportDate">READY TO SCAN</span></div>
+      <div class="score-layout">
+        <div class="score-ring">
+          <svg viewBox="0 0 160 160" aria-hidden="true"><defs><linearGradient id="scoreGradient" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stop-color="#8b5cf6"/><stop offset="100%" stop-color="#3b82f6"/></linearGradient></defs><circle class="ring-track" cx="80" cy="80" r="70"/><circle class="ring-value" id="scoreArc" cx="80" cy="80" r="70"/></svg>
+          <div class="score-number"><strong id="overallScore">—</strong><span>STORE SCORE / 100</span></div>
+        </div>
+        <div class="score-summary"><h3 id="scoreHeadline">Ready for your store check?</h3><p id="scoreDescription">Run an audit to see a clear overview of storefront performance, search visibility, usability, and important store-readiness reminders.</p><div class="score-chips"><span class="score-chip" id="scoreChip">Waiting for URL</span><span class="score-chip good" id="checkChip">11 review areas</span></div></div>
+      </div>
+      <div class="stats">
+        <div class="stat"><div class="stat-top"><span>Review areas</span><span class="stat-icon i-purple">◈</span></div><strong id="statChecks">11</strong><small>Across your storefront</small></div>
+        <div class="stat"><div class="stat-top"><span>Priority findings</span><span class="stat-icon i-pink">!</span></div><strong id="statIssues">—</strong><small>Recommended improvements</small></div>
+        <div class="stat"><div class="stat-top"><span>Performance</span><span class="stat-icon i-blue">↗</span></div><strong id="statPerformance">—</strong><small>PageSpeed result</small></div>
+      </div>
+    </section>
+    <aside class="side-stack">
+      <section class="panel quick-card"><h3>✨ Make your next move count</h3><p>Use the findings below as a focused improvement checklist instead of trying to change everything at once.</p>
+        <ul class="quick-list"><li><span class="check">✓</span><span><b>Start with speed.</b> Compress large images and remove apps or scripts you no longer use.</span></li><li><span class="check">✓</span><span><b>Build buyer confidence.</b> Make contact, shipping, returns, and privacy information easy to find.</span></li><li><span class="check">✓</span><span><b>Reduce buying friction.</b> Test product selection, cart, shipping details, and checkout on your own device.</span></li></ul>
+      </section>
+      <section class="panel panel-pad"><div class="section-head"><div><div class="section-title">Audit details</div><div class="section-desc">What this report covers.</div></div><span class="cat-icon i-purple">⌁</span></div>
+        <div style="font-size:12px;line-height:1.8;color:var(--muted)">• Public storefront and page performance<br>• SEO and accessibility signals<br>• Product, trust, and policy checklist<br>• Clear findings with recommended actions</div>
+        <div class="scan-meta" id="scanMeta">No audit run yet. Your report will appear here.</div>
+      </section>
+    </aside>
+  </div>
+
+  <section class="panel panel-pad category-section">
+    <div class="section-head"><div><div class="section-title">Store health categories</div><div class="section-desc">Every review area is shown with a score, status, and practical guidance.</div></div><span class="tiny-label">11 CATEGORIES</span></div>
+    <div class="category-grid" id="categoryGrid"></div>
+  </section>
+
+  <section class="panel panel-pad findings-section">
+    <div class="findings-head"><div><div class="section-title">Findings & recommendations</div><div class="section-desc">Specific next steps to improve your storefront.</div></div><div class="filter-row" id="filters"><button class="filter active" data-filter="all">All findings</button><button class="filter" data-filter="high">High priority</button><button class="filter" data-filter="medium">Medium</button><button class="filter" data-filter="low">Quick wins</button></div></div>
+    <div class="findings" id="findingsList"><div class="empty">Enter your storefront URL above to generate findings and recommendations.</div></div>
+  </section>
+
+  <footer class="footer"><div><div class="footer-brand">StorePulse <span style="color:#8b5cf6">✦</span></div><div style="margin-top:4px">A clearer view of your storefront's next steps.</div></div><div class="footer-actions"><button class="secondary" id="downloadBtn">↓ Download report</button><button class="secondary" id="printBtn">Print / Save PDF</button><button class="secondary" id="resetBtn">Reset audit</button></div></footer>
+</div>
+<div class="toast" id="toast"></div>
+<script>
+const categories = [
+ {id:'https',name:'HTTPS & Connection',icon:'🔒',color:'#eee9ff',desc:'Secure connection and site accessibility.'},
+ {id:'mobile',name:'Mobile Performance',icon:'📱',color:'#e7f1ff',desc:'Speed and experience on mobile devices.'},
+ {id:'desktop',name:'Desktop Performance',icon:'💻',color:'#e6fbf4',desc:'Loading speed on desktop devices.'},
+ {id:'seo',name:'SEO & Search Visibility',icon:'🔎',color:'#fff0e7',desc:'Search-friendly page structure and metadata.'},
+ {id:'access',name:'Accessibility',icon:'♿',color:'#ffe8f4',desc:'Inclusive navigation and readable content.'},
+ {id:'best',name:'Web Best Practices',icon:'✨',color:'#e5faff',desc:'Technical quality and browser best practices.'},
+ {id:'cart',name:'Cart & Buying Journey',icon:'🛒',color:'#fff4d9',desc:'Product-to-cart clarity and buyer flow.'},
+ {id:'payments',name:'Payment Readiness',icon:'💳',color:'#f0eaff',desc:'Visible payment information and checkout prep.'},
+ {id:'products',name:'Products & Images',icon:'🖼️',color:'#ffe9e8',desc:'Product presentation and image quality.'},
+ {id:'shipping',name:'Shipping & Returns',icon:'📦',color:'#e6f7ff',desc:'Delivery, returns, and policy clarity.'},
+ {id:'trust',name:'Trust & Store Policies',icon:'🛡️',color:'#e8f9ed',desc:'Contact details and shopper confidence.'}
+];
+let currentReport = null;
+let currentFilter = 'all';
+const $ = id => document.getElementById(id);
+const clamp = n => Math.max(0, Math.min(100, Math.round(Number(n)||0)));
+function validUrl(raw){
+  let value=String(raw||'').trim();
+  if(!value)return null;
+  // Accept pasted domains and storefront links without requiring https://.
+  if(!/^[a-zA-Z][a-zA-Z0-9+.-]*:\/\//.test(value)) value='https://'+value;
+  try{
+    const u=new URL(value);
+    if(!['http:','https:'].includes(u.protocol))return null;
+    // Require a plausible hostname, but do not restrict store platform or domain.
+    if(!u.hostname || !u.hostname.includes('.') || u.hostname.startsWith('.') || u.hostname.endsWith('.'))return null;
+    return u;
+  }catch{return null}
+}
+function showToast(message){const t=$('toast');t.textContent=message;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),2600)}
+function scoreStatus(score){return score>=85?{text:'Strong',cls:'good'}:score>=65?{text:'Improve',cls:'warn'}:{text:'Priority',cls:'bad'}}
+function drawCategories(results){
+ $('categoryGrid').innerHTML=categories.map(c=>{const r=results[c.id]||{score:65,note:'Review this area and follow the recommendation below.'};const s=scoreStatus(r.score);return `<article class="category"><div class="category-top"><div class="cat-icon" style="background:${c.color}">${c.icon}</div><div class="cat-score">${clamp(r.score)}<span style="font-size:10px;color:#aaa5bc">/100</span></div></div><h3>${c.name}</h3><p>${escapeHtml(r.note||c.desc)}</p><div class="progress"><span style="width:${clamp(r.score)}%;background:${r.score>=85?'linear-gradient(90deg,#34d399,#10b981)':r.score>=65?'linear-gradient(90deg,#fbbf24,#f59e0b)':'linear-gradient(90deg,#fb7185,#ef4444)'}"></span></div><div class="cat-bottom"><span class="status ${s.cls}">${s.text}</span><span style="font-size:10px;color:#a09bb4">Score</span></div></article>`}).join('');
+}
+function escapeHtml(v){return String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}
+function renderFindings(findings){
+ const list=findings.filter(f=>currentFilter==='all'||f.priority===currentFilter);
+ $('findingsList').innerHTML=list.length?list.map(f=>`<article class="finding priority-${f.priority}"><div class="finding-symbol">${f.priority==='high'?'!':f.priority==='medium'?'↗':f.priority==='low'?'✓':'i'}</div><div class="finding-body"><h4>${escapeHtml(f.title)}</h4><p>${escapeHtml(f.detail)}</p></div><span class="finding-tag">${f.priority==='high'?'High priority':f.priority==='medium'?'Medium':f.priority==='low'?'Quick win':'Helpful tip'}</span></article>`).join(''):'<div class="empty">No findings in this filter. Try another filter.</div>';
+}
+function updateScore(score){
+ const s=clamp(score);$('overallScore').textContent=s;$('scoreArc').style.strokeDashoffset=440-(440*s/100);
+ const headline=s>=85?'Your storefront is looking strong!':s>=70?'A good foundation to build on.':s>=50?'There are opportunities to improve.':'Let’s strengthen your storefront.';
+ $('scoreHeadline').textContent=headline;$('scoreDescription').textContent=s>=85?'Your current review looks positive. Use the recommendations below to keep improving speed, clarity, and buyer confidence.':s>=70?'Your store has a starting point. Focus on the highest-priority recommendations first to improve the customer journey.':'Start with the high-priority findings below. A few focused changes to speed, clarity, and trust can make the shopping experience better.';
+ $('scoreChip').textContent=s>=85?'Strong overall':s>=65?'Room to improve':'Needs attention';$('scoreChip').className='score-chip '+(s>=85?'good':s>=65?'warn':'');
+}
+function addFinding(findings,priority,title,detail){findings.push({priority,title,detail})}
+function baselineAudit(url){
+ const findings=[], results={};
+ const secure=url.protocol==='https:';
+ results.https={score:secure?100:35,note:secure?'HTTPS is present in the address.':'The address uses HTTP. Switch your domain to HTTPS in your domain/hosting settings.'};
+ if(!secure)addFinding(findings,'high','Secure your storefront with HTTPS','Use an HTTPS storefront URL and check your domain/SSL settings. A secure connection protects visitors and helps build confidence.');
+ results.mobile={score:68,note:'Run the live PageSpeed test for a measured mobile score.'};
+ results.desktop={score:74,note:'Run the live PageSpeed test for a measured desktop score.'};
+ results.seo={score:65,note:'Check titles, descriptions, headings, and search indexing.'};
+ results.access={score:70,note:'Review contrast, image alt text, labels, and keyboard access.'};
+ results.best={score:72,note:'Check browser best practices and remove unnecessary scripts.'};
+ results.cart={score:62,note:'Manually test product options, cart updates, and checkout steps.'};
+ results.payments={score:65,note:'Confirm payment methods and checkout settings in Shopify admin.'};
+ results.products={score:68,note:'Review image quality, product details, and variant clarity.'};
+ results.shipping={score:60,note:'Make delivery rates, timeframes, and return terms easy to find.'};
+ results.trust={score:65,note:'Check contact information, policy pages, and business details.'};
+ addFinding(findings,'high','Make shipping and returns easy to understand','Publish clear delivery costs, estimated delivery times, return windows, refund conditions, and a link to your policies near product and cart pages.');
+ addFinding(findings,'high','Review the complete buying journey','On a phone and desktop, open a product, choose each variant, add it to cart, change quantity, and proceed through checkout as far as you safely can.');
+ addFinding(findings,'medium','Improve product-page clarity','Use sharp product images, descriptive titles, helpful specifications, sizing or usage details where relevant, and clear variant labels.');
+ addFinding(findings,'medium','Check search titles and descriptions','Give important pages unique, accurate title tags and meta descriptions. Use one clear main heading and descriptive image alt text.');
+ addFinding(findings,'medium','Build trust with visible contact details','Add a working contact page and make your shipping, returns, privacy, and terms pages easy to find in the footer.');
+ addFinding(findings,'low','Optimise large product images','Resize images to the dimensions needed on the page and use compressed WebP/AVIF where supported. Avoid uploading unnecessarily huge files.');
+ addFinding(findings,'low','Remove unnecessary storefront scripts','Review installed apps and tracking scripts. Remove unused app embeds and test the store after changes.');
+ addFinding(findings,'info','Payment readiness checklist','Payment availability depends on your Shopify settings, provider, region, and checkout configuration. Confirm active providers and test orders in Shopify admin.');
+ addFinding(findings,'info','Accessibility quick check','Check that text is readable, buttons have clear labels, links make sense out of context, and product images have useful alt text.');
+ return {url:url.href,results,findings,createdAt:new Date().toISOString(),source:'checklist'};
+}
+async function pageSpeed(url,device){
+ const endpoint='https://www.googleapis.com/pagespeedonline/v5/runPagespeed?url='+encodeURIComponent(url.href)+'&strategy='+device+'&category=PERFORMANCE&category=SEO&category=ACCESSIBILITY&category=BEST_PRACTICES';
+ const controller=new AbortController();const timeout=setTimeout(()=>controller.abort(),28000);
+ try{const response=await fetch(endpoint,{signal:controller.signal});if(!response.ok)throw new Error('PageSpeed response '+response.status);return await response.json()}finally{clearTimeout(timeout)}
+}
+function metricScore(data,category){const v=data?.lighthouseResult?.categories?.[category]?.score;return typeof v==='number'?Math.round(v*100):null}
+function auditFromPageSpeed(base,mobileData,desktopData){
+ const results=base.results;
+ const m=metricScore(mobileData,'performance'),d=metricScore(desktopData,'performance');
+ const seo=metricScore(mobileData,'seo'),access=metricScore(mobileData,'accessibility'),best=metricScore(mobileData,'best-practices');
+ if(m!==null)results.mobile={score:m,note:'Measured mobile performance score from PageSpeed Insights.'};
+ if(d!==null)results.desktop={score:d,note:'Measured desktop performance score from PageSpeed Insights.'};
+ if(seo!==null)results.seo={score:seo,note:'Measured SEO audit score from PageSpeed Insights.'};
+ if(access!==null)results.access={score:access,note:'Measured accessibility audit score from PageSpeed Insights.'};
+ if(best!==null)results.best={score:best,note:'Measured web best-practices score from PageSpeed Insights.'};
+ const findings=base.findings.filter(f=>!['Make shipping and returns easy to understand','Improve product-page clarity','Check search titles and descriptions','Remove unnecessary storefront scripts'].includes(f.title));
+ const audits=mobileData?.lighthouseResult?.audits||{};
+ const metricHints=[
+  ['largest-contentful-paint','Improve the main content loading time','Reduce large hero images, defer non-essential scripts, and review theme/app code that delays the main content.'],
+  ['render-blocking-resources','Reduce render-blocking resources','Review scripts and styles that delay first paint. Defer non-critical scripts where safe.'],
+  ['uses-optimized-images','Serve more efficient images','Compress large images and serve appropriately sized modern image formats.'],
+  ['uses-text-compression','Enable text compression','Check whether your hosting/CDN serves text assets compressed.'],
+  ['meta-description','Add a helpful meta description','Write a unique summary that accurately describes the page and encourages relevant search clicks.'],
+  ['image-alt','Improve image alternative text','Add useful alt text to meaningful product images and leave decorative images with empty alt text.']
+ ];
+ for(const [key,title,detail] of metricHints){const a=audits[key];if(a&&a.score!==null&&a.score<0.9)addFinding(findings,a.score<0.5?'high':'medium',title,detail)}
+ base.results=results;base.findings=findings;base.source='pagespeed';base.performance={mobile:m,desktop:d};
+ return base;
+}
+function renderReport(report){
+ currentReport=report;const vals=Object.values(report.results).map(r=>clamp(r.score));const average=Math.round(vals.reduce((a,b)=>a+b,0)/vals.length);
+ updateScore(average);drawCategories(report.results);renderFindings(report.findings);
+ $('statChecks').textContent=categories.length;$('statIssues').textContent=report.findings.filter(f=>f.priority==='high'||f.priority==='medium').length;
+ $('statPerformance').textContent=report.performance?.mobile!=null?report.performance.mobile+'/100':'Ready';
+ $('reportDate').textContent=new Date(report.createdAt).toLocaleString([],{month:'short',day:'numeric',hour:'2-digit',minute:'2-digit'}).toUpperCase();
+ $('reportSubtitle').textContent='Review results for '+new URL(report.url).hostname;
+ $('scanMeta').textContent=report.source==='pagespeed'?'PageSpeed Insights results included where available. Store policy and checkout items remain a practical checklist.':'Initial checklist prepared. PageSpeed metrics could not be retrieved, so performance scores are estimates rather than measured results.';
+ $('checkChip').textContent=report.source==='pagespeed'?'Live page metrics included':'Checklist + recommendations';
+ $('checkChip').className='score-chip '+(report.source==='pagespeed'?'good':'warn');
+}
+$('auditForm').addEventListener('submit',async e=>{
+ e.preventDefault();const parsed=validUrl($('storeUrl').value.trim());if(!parsed){showToast('Enter a valid store website link, for example mystore.myshopify.com or https://mystore.com');return}
+ currentReport=null;$('scanBtn').disabled=true;$('scanBtn').textContent='Analysing…';$('loader').classList.add('show');$('loaderText').textContent='Checking public page performance…';
+ const base=baselineAudit(parsed);let report=base;
+ try{
+   const [mobileResult,desktopResult]=await Promise.allSettled([pageSpeed(parsed,'mobile'),pageSpeed(parsed,'desktop')]);
+   const mobile=mobileResult.status==='fulfilled'?mobileResult.value:null;const desktop=desktopResult.status==='fulfilled'?desktopResult.value:null;
+   if(mobile||desktop){report=auditFromPageSpeed(base,mobile,desktop)}
+   else {report.source='checklist';report.findings.unshift({priority:'info',title:'Performance scan not available this time','detail':'The live PageSpeed service did not return results. The rest of the report is still available as a checklist; try again later for measured page scores.'})}
+ }catch(err){report.source='checklist';report.findings.unshift({priority:'info',title:'Performance scan not available this time',detail:'The live PageSpeed service did not return results. The rest of the report is still available as a checklist; try again later for measured page scores.'})}
+ finally{$('scanBtn').disabled=false;$('scanBtn').textContent='✦ Analyse store';$('loader').classList.remove('show')}
+ renderReport(report);showToast('Your store report is ready.');
+});
+$('filters').addEventListener('click',e=>{const b=e.target.closest('[data-filter]');if(!b)return;currentFilter=b.dataset.filter;document.querySelectorAll('.filter').forEach(x=>x.classList.toggle('active',x===b));if(currentReport)renderFindings(currentReport.findings)});
+$('printBtn').addEventListener('click',()=>window.print());
+$('resetBtn').addEventListener('click',()=>{currentReport=null;currentFilter='all';$('storeUrl').value='';$('overallScore').textContent='—';$('scoreArc').style.strokeDashoffset=110;$('scoreHeadline').textContent='Ready for your store check?';$('scoreDescription').textContent='Run an audit to see a clear overview of storefront performance, search visibility, usability, and important store-readiness reminders.';$('scoreChip').textContent='Waiting for URL';$('checkChip').textContent='11 review areas';$('checkChip').className='score-chip good';$('statChecks').textContent='11';$('statIssues').textContent='—';$('statPerformance').textContent='—';$('reportDate').textContent='READY TO SCAN';$('reportSubtitle').textContent='Your audit summary and the next best steps.';$('scanMeta').textContent='No audit run yet. Your report will appear here.';$('categoryGrid').innerHTML='';$('findingsList').innerHTML='<div class="empty">Enter your storefront URL above to generate findings and recommendations.</div>';document.querySelectorAll('.filter').forEach((x,i)=>x.classList.toggle('active',i===0));showToast('Audit reset.')});
+$('downloadBtn').addEventListener('click',()=>{if(!currentReport){showToast('Run an audit before downloading a report.');return}const payload={tool:'StorePulse Shopify Store Auditor',...currentReport,overallScore:Number($('overallScore').textContent),categories:categories.map(c=>({name:c.name,...currentReport.results[c.id]}))};const blob=new Blob([JSON.stringify(payload,null,2)],{type:'application/json'});const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='storepulse-audit-report.json';a.click();URL.revokeObjectURL(a.href);showToast('Report downloaded.')});
+</script>
 </body>
 </html>
