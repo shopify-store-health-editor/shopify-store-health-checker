@@ -2,422 +2,260 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width,initial-scale=1">
-<meta name="theme-color" content="#0b1020">
-<title>StorePulse | Live Store Health Results</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>StorePulse | Store Auditor</title>
 <style>
-:root{
-  --bg:#0b1020;--card:#131c2e;--line:#28354b;
-  --text:#edf3ff;--muted:#94a3b8;
-  --green:#22c995;--yellow:#ffc04d;--red:#ff596f;
-}
+:root{--bg:#0b1020;--card:#131e32;--line:#2a3851;--text:#eef4ff;--muted:#9aabc3;--green:#21d4a0;--yellow:#ffc857;--red:#ff647c;--blue:#aab8ff}
 *{box-sizing:border-box}
-body{margin:0;background:var(--bg);color:var(--text);
-font:14px/1.6 system-ui,-apple-system,Segoe UI,sans-serif}
-main{max-width:1150px;margin:auto;padding:22px 16px 50px}
-header{display:flex;align-items:center;justify-content:space-between;
-gap:12px;flex-wrap:wrap;margin-bottom:25px}
-.brand{display:flex;align-items:center;gap:12px;font-size:23px;font-weight:850}
-.logo{display:grid;place-items:center;width:43px;height:43px;border-radius:13px;
-background:linear-gradient(135deg,#6d73ff,#22c995);color:#081421;font-size:25px}
-.brand span{color:var(--green)}
-.pill{border:1px solid var(--line);border-radius:30px;padding:5px 11px;
-font-size:10px;color:var(--muted)}
-.hero{padding:clamp(22px,5vw,40px);border:1px solid #313b60;border-radius:22px;
-background:radial-gradient(ellipse at top right,#4944a644,transparent 55%),var(--card)}
-.eyebrow{font-size:11px;letter-spacing:1.8px;font-weight:800;color:var(--green)}
-h1{font-size:clamp(29px,5vw,43px);line-height:1.15;letter-spacing:-1px;margin:12px 0}
-.hero p{color:var(--muted);max-width:680px}
-form{display:flex;gap:10px;margin-top:22px}
-.input{display:flex;flex:1;min-width:0;align-items:center;gap:8px;
-background:#0b1221;border:1px solid var(--line);border-radius:11px;padding-left:13px}
-.input span{color:var(--muted)}
-input{min-width:0;width:100%;background:transparent;border:0;outline:0;
-color:white;padding:15px 10px;font:inherit}
-button{font:inherit;font-weight:750;cursor:pointer;border:0;border-radius:10px;padding:13px 17px}
-.primary{background:var(--green);color:#071b16}
-.primary:disabled{opacity:.6;cursor:wait}
-.secondary{background:#202b40;border:1px solid var(--line);color:var(--text)}
-.status{display:none;margin-top:14px;border-radius:10px;padding:12px 14px}
-.status.show{display:block;background:#1c2b43;color:#e0e9ff}
-.status.error{background:#48212d;color:#ffdce2}
-.status.good{background:#12382f;color:#b7ffe5}
-.sectionhead{display:flex;align-items:center;justify-content:space-between;
-gap:12px;flex-wrap:wrap;margin:25px 0 13px}
-.sectionhead h2{font-size:16px;margin:0}
-.muted{font-size:12px;color:var(--muted)}
-.grid{display:grid;grid-template-columns:repeat(12,minmax(0,1fr));gap:14px}
-.card{background:var(--card);border:1px solid var(--line);border-radius:15px;
-padding:19px;min-width:0}
-.scorecard{grid-column:span 4}
-.summary{grid-column:span 8}
-.full{grid-column:1/-1}
-.card h3{font-size:14px;margin:0 0 15px}
-.scoreflex{display:flex;align-items:center;gap:18px}
-.gauge{width:110px;height:110px;flex:none;border-radius:50%;display:grid;
-place-items:center;background:conic-gradient(var(--green) 0%,#273148 0%);
-position:relative}
-.gauge:before{content:"";position:absolute;inset:9px;border-radius:50%;background:var(--card)}
-.gaugeinside{position:relative;text-align:center}
-.gaugeinside strong{display:block;font-size:31px;line-height:1.2}
-.gaugeinside span{font-size:10px;color:var(--muted)}
-.biglabel{font-weight:800;font-size:18px}
-.summarygrid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:9px}
-.stat{background:#0d1525;border:1px solid var(--line);padding:12px;border-radius:11px}
-.stat strong{font-size:23px;display:block}
-.stat span{font-size:10px;color:var(--muted)}
+body{margin:0;background:var(--bg);color:var(--text);font:14px/1.55 system-ui,Arial,sans-serif}
+main{max-width:1250px;margin:auto;padding:22px 15px 60px}
+header,.flex{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap}
+.brand{font-size:25px;font-weight:850}.brand span{color:var(--green)}
+.muted{color:var(--muted);font-size:12px}
+.panel{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:19px;margin-top:16px}
+h1{font-size:clamp(28px,5vw,43px);line-height:1.12;margin:12px 0}
+h2{font-size:18px;margin:0}
+p{color:var(--muted)}
+label{display:block;margin:12px 0 6px;font-weight:700}
+input,textarea,select{width:100%;padding:12px;border-radius:10px;border:1px solid var(--line);background:#0b1425;color:var(--text);font:inherit}
+textarea{min-height:115px;resize:vertical}
+button{padding:11px 14px;border-radius:10px;border:1px solid var(--line);background:#22304a;color:var(--text);font:inherit;font-weight:750;cursor:pointer;margin:4px 3px 4px 0}
+button.primary{background:var(--green);color:#062219;border-color:transparent}
+button:disabled{opacity:.45;cursor:not-allowed}
+.grid{display:grid;grid-template-columns:2fr 1fr;gap:14px}
+.stats{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-top:15px}
+.stat{background:#0b1425;border:1px solid var(--line);border-radius:12px;padding:13px}
+.stat strong{display:block;font-size:25px}
 .red{color:var(--red)}.yellow{color:var(--yellow)}.green{color:var(--green)}
-.issuegrid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
-.issue{border:1px solid var(--line);background:#0e1626;border-radius:12px;padding:15px}
-.issuehead{display:flex;justify-content:space-between;gap:8px;align-items:center}
-.issuehead strong{font-size:13px}
-.badge{font-size:10px;font-weight:800;padding:4px 8px;border-radius:20px;white-space:nowrap}
-.badge.red{background:#49202c}.badge.yellow{background:#48371b}
-.badge.green{background:#123a30}
-.track{height:7px;border-radius:10px;background:#29344a;overflow:hidden;margin:13px 0 8px}
-.bar{height:100%;border-radius:10px;width:0;transition:width .5s}
-.issue p{font-size:12px;color:var(--muted);margin:8px 0 0}
-.finding{padding:15px 0;border-bottom:1px solid var(--line);display:flex;gap:12px}
-.finding:last-child{border-bottom:0}
-.findicon{width:33px;height:33px;flex:none;border-radius:9px;
-display:grid;place-items:center;background:#243047}
-.finding strong{font-size:13px}
-.finding p{font-size:12px;color:var(--muted);margin:5px 0}
-.priority{font-size:10px;font-weight:800;letter-spacing:.5px}
-.actions{display:flex;gap:8px;flex-wrap:wrap}
-.empty{border:1px dashed var(--line);border-radius:10px;padding:23px;
-text-align:center;color:var(--muted)}
-footer{font-size:11px;color:var(--muted);margin-top:20px}
-a{color:#9ba7ff}
-@media(max-width:720px){
-.scorecard,.summary{grid-column:1/-1}
-.summarygrid{grid-template-columns:repeat(2,minmax(0,1fr))}
-}
-@media(max-width:500px){
-main{padding:15px 10px 35px}
-form{flex-direction:column}
-.primary{width:100%}
-.issuegrid{grid-template-columns:1fr}
-.card{padding:15px}
-.gauge{width:96px;height:96px}
-}
-@media print{
-body{background:white;color:#111}
-.card,.issue,.hero{background:white;color:#111;border-color:#ccc}
-.hero p,.muted,.issue p,footer{color:#444}
-form,.actions,.pill{display:none!important}
-}
+.status{padding:11px;border-radius:9px;background:#1d2b43;margin-top:10px;overflow-wrap:anywhere}
+.error{background:#48212d;color:#ffdce2}.good{background:#12382f;color:#b7ffe5}
+.tablewrap{overflow:auto;margin-top:14px}
+table{border-collapse:collapse;width:100%;min-width:980px}
+th,td{padding:11px;text-align:left;border-bottom:1px solid var(--line);vertical-align:top;font-size:12px}
+th{color:var(--muted);font-size:10px;text-transform:uppercase;letter-spacing:.5px}
+a{color:var(--blue);overflow-wrap:anywhere}
+.score{font-size:18px;font-weight:850}
+.bar{height:6px;background:#29364d;border-radius:8px;margin-top:5px;overflow:hidden}
+.bar span{display:block;height:100%}
+.email{overflow-wrap:anywhere;max-width:220px;margin-bottom:4px}
+.badge{border:1px solid var(--line);border-radius:30px;padding:4px 9px;font-size:10px}
+.two{display:grid;grid-template-columns:1fr 1fr;gap:15px}
+footer{font-size:11px;color:var(--muted);margin-top:22px}
+@media(max-width:700px){main{padding:12px 9px}.grid,.two{grid-template-columns:1fr}.stats{grid-template-columns:repeat(2,1fr)}.panel{padding:13px}}
 </style>
 </head>
 <body>
 <main>
 <header>
-  <div class="brand"><div class="logo">⌁</div>
-    <div>Store<span>Pulse</span><div class="muted">STORE HEALTH AUDITOR</div></div>
+  <div class="brand">⌁ Store<span>Pulse</span>
+    <div class="muted">STORE AUDIT · BULK SCANNER · CONTACT FINDER</div>
   </div>
-  <div class="pill">STORE ANALYSIS DASHBOARD</div>
+  <span class="badge">LIVE CHECKS</span>
 </header>
 
-<section class="hero">
-  <div class="eyebrow">STOREFRONT HEALTH CHECK</div>
-  <h1>Discover what's hurting your store.</h1>
-  <p>Enter a Shopify store domain to generate a health report, identify areas that need attention, and get recommendations for improvement.</p>
-  <form id="form">
-    <div class="input"><span>↗</span>
-      <input id="url" placeholder="yourstore.myshopify.com or yourstore.com"
-      aria-label="Store website URL" autocomplete="url" required>
+<section class="panel">
+  <div class="green muted">PUBLIC STOREFRONT ANALYSIS</div>
+  <h1>Discover store issues.<br>Find business contacts.</h1>
+  <p>Check publicly accessible store pages, identify visible technical issues, collect published business emails, and prepare individual outreach messages.</p>
+
+  <label for="api">Secure audit API URL</label>
+  <input id="api" placeholder="https://your-worker.workers.dev">
+  <div class="muted">Enter the deployed Worker URL once. It will be saved in this browser.</div>
+
+  <div class="grid">
+    <div>
+      <label for="urls">Store URLs — one per line</label>
+      <textarea id="urls" placeholder="https://example-store.com&#10;another-store.myshopify.com&#10;https://third-store.com"></textarea>
+      <button id="demo">Load example URLs</button>
     </div>
-    <button class="primary" id="submit" type="submit">Analyze Store →</button>
-  </form>
-  <div class="muted" style="margin-top:10px">Results appear below after you submit the domain.</div>
-  <div id="status" class="status" role="status" aria-live="polite"></div>
-</section>
-
-<div class="sectionhead">
-  <h2>Live Store Results</h2>
-  <span class="muted" id="time">Waiting for store analysis</span>
-</div>
-
-<section class="grid">
-  <div class="card scorecard">
-    <h3>Overall store health</h3>
-    <div class="scoreflex">
-      <div class="gauge" id="gauge">
-        <div class="gaugeinside"><strong id="score">—</strong><span>OUT OF 100</span></div>
-      </div>
-      <div>
-        <div class="biglabel" id="grade">Not analyzed</div>
-        <div class="muted" id="scoreNote">Enter a domain to begin.</div>
-      </div>
-    </div>
-    <p class="muted">Higher health percentage is better.</p>
-  </div>
-
-  <div class="card summary">
-    <h3>Issue summary</h3>
-    <div class="summarygrid">
-      <div class="stat"><strong class="red" id="high">—</strong><span>Needs urgent review</span></div>
-      <div class="stat"><strong class="yellow" id="medium">—</strong><span>Needs improvement</span></div>
-      <div class="stat"><strong class="green" id="low">—</strong><span>Good indicators</span></div>
-      <div class="stat"><strong id="total">—</strong><span>Areas checked</span></div>
-    </div>
-    <p class="muted" id="summaryNote">Run the analysis to see the report.</p>
-  </div>
-
-  <div class="card full">
-    <h3>Store information</h3>
-    <div id="storeDomain" style="overflow-wrap:anywhere">No domain entered</div>
-    <p class="muted" id="storeDetails">Your report will be displayed here.</p>
-  </div>
-
-  <div class="card full">
-    <div class="sectionhead" style="margin:0 0 14px">
-      <h2>Seven health indicators</h2>
-      <span class="muted">Red: 0–49% · Yellow: 50–79% · Green: 80–100%</span>
-    </div>
-    <div class="issuegrid" id="issues">
-      <div class="empty" style="grid-column:1/-1">Enter a store URL to generate the practice report.</div>
+    <div>
+      <label for="file">Import URL list</label>
+      <input id="file" type="file" accept=".txt,.csv,text/plain,text/csv">
+      <p class="muted">Duplicates are removed by domain. Test a few stores first; some websites block automated requests.</p>
+      <button id="scan" class="primary">Start real scan</button>
+      <button id="clear">Clear results</button>
+      <div id="status" class="status" role="status" aria-live="polite">Ready. Add your API URL and store list.</div>
     </div>
   </div>
 
-  <div class="card full">
-    <div class="sectionhead" style="margin:0 0 10px">
-      <h2>Findings & recommended fixes</h2>
-      <div class="actions">
-        <button class="secondary" id="download" disabled>Download report</button>
-        <button class="secondary" id="print">Print / Save PDF</button>
-      </div>
-    </div>
-    <div id="findings"><div class="empty">Your findings will appear here.</div></div>
-  </div>
-
-  <div class="card full">
-    <h3>How this practice version works</h3>
-    <p class="muted">The domain format and HTTPS scheme are checked in your browser. The seven category percentages are simulated practice values, not verified measurements of the submitted store. For real findings, connect a backend that fetches the storefront and runs actual performance, SEO, accessibility and technical checks.</p>
-    <p class="muted">You can test real performance separately with <a href="https://pagespeed.web.dev/" target="_blank" rel="noopener noreferrer">Google PageSpeed Insights</a>.</p>
+  <div class="stats">
+    <div class="stat"><strong id="nStores">0</strong><span class="muted">Stores processed</span></div>
+    <div class="stat"><strong id="nEmails">0</strong><span class="muted">Public emails found</span></div>
+    <div class="stat"><strong id="nWarnings">0</strong><span class="muted">Warnings detected</span></div>
+    <div class="stat"><strong id="nGood">0</strong><span class="muted">Successful scans</span></div>
   </div>
 </section>
-<footer>StorePulse · Practice prototype · Do not treat simulated indicators as verified store defects.</footer>
+
+<section class="panel">
+  <div class="flex">
+    <div><h2>Audit results</h2><div class="muted">Green: 80–100 · Yellow: 50–79 · Red: below 50. Scores use completed checks only.</div></div>
+    <div><button id="export" disabled>Export audit CSV</button><button id="exportContacts" disabled>Export contacts CSV</button></div>
+  </div>
+  <div class="tablewrap">
+    <table>
+      <thead><tr><th>Store</th><th>Health</th><th>HTTP / speed</th><th>Page / SEO signals</th><th>Images</th><th>Public email</th><th>Detected findings</th><th>Action</th></tr></thead>
+      <tbody id="results"><tr><td colspan="8" class="muted">No results yet.</td></tr></tbody>
+    </table>
+  </div>
+</section>
+
+<section class="panel">
+  <h2>One-by-one email outreach</h2>
+  <p class="muted">Choose a scanned store, review the public contact address, personalize the message, then open your email app. You decide whether to send.</p>
+  <div class="two">
+    <div>
+      <label for="store">Store</label><select id="store"><option value="">Scan stores first</option></select>
+      <label for="recipient">Public business email</label><input id="recipient" placeholder="Email discovered during scan">
+      <label for="subject">Email subject</label><input id="subject" value="A few suggestions for your online store">
+      <label for="message">Message</label>
+      <textarea id="message">Hello,
+
+I was looking through your public storefront and noticed a few areas that may be worth reviewing. I can share the specific findings and practical suggestions if that would be useful.
+
+Would you be interested in a short summary?
+
+Best regards</textarea>
+      <button class="primary" id="draft" disabled>Review & open email draft</button>
+    </div>
+    <div>
+      <h2>Selected store findings</h2>
+      <div id="details" class="status">Select a scanned store to view its findings.</div>
+      <label for="notes">Your notes</label>
+      <textarea id="notes" placeholder="Contact source, follow-up notes, or next steps"></textarea>
+      <p class="muted">Email discovery is best-effort. A missing address means it wasn't found on the pages checked—not that the business has no email.</p>
+    </div>
+  </div>
+</section>
+
+<footer>StorePulse checks public HTML only. It does not access Shopify admin, checkout data, private analytics, or real browser Core Web Vitals. Never treat an unchecked item as a confirmed defect.</footer>
 </main>
 
 <script>
 'use strict';
 const $=id=>document.getElementById(id);
-let latest=null;
+let rows=[],successful=0;
+$('api').value=localStorage.getItem('storepulse_api')||'';
+$('api').addEventListener('change',()=>localStorage.setItem('storepulse_api',$('api').value.trim().replace(/\/+$/,'')));
 
-const checks=[
- {name:'Storefront Performance',icon:'⚡',
-  problem:'Loading speed and heavy resources need review.',
-  fix:'Run Lighthouse and inspect large images, JavaScript bundles, app scripts and third-party widgets.',
-  evidence:'Actual loading speed is not measured by this prototype.'},
- {name:'Mobile Experience',icon:'▣',
-  problem:'Mobile layout and shopping usability need review.',
-  fix:'Test menus, text, image sizing, product variants and Add to cart on real mobile devices.',
-  evidence:'A real mobile viewport test has not been performed.'},
- {name:'SEO & Search Visibility',icon:'⌕',
-  problem:'Search metadata and indexing settings need review.',
-  fix:'Check page titles, meta descriptions, canonical tags, headings, sitemap and product structured data.',
-  evidence:'The store HTML and search metadata have not been crawled.'},
- {name:'Accessibility',icon:'◉',
-  problem:'Accessibility needs a full check.',
-  fix:'Review image alt text, keyboard access, form labels, color contrast and visible focus states.',
-  evidence:'No automated accessibility scan has been performed.'},
- {name:'Product Page Quality',icon:'◇',
-  problem:'Product information and purchase experience need review.',
-  fix:'Check product descriptions, image quality, variant selection, stock details, prices and Add to cart.',
-  evidence:'Product pages have not been inspected.'},
- {name:'Trust & Store Policies',icon:'✓',
-  problem:'Store policies and customer trust information need review.',
-  fix:'Make contact details, shipping, returns, refunds and privacy information easy to find.',
-  evidence:'Policy pages have not been opened or verified.'},
- {name:'Technical Setup & Security',icon:'⚙',
-  problem:'Technical configuration needs further review.',
-  fix:'Verify HTTPS, redirects, broken links, robots directives, canonical URLs and sitemap access.',
-  evidence:'Only the entered URL format and protocol are checked here.'}
-];
+function say(message,type=''){ $('status').textContent=message;$('status').className='status '+type; }
+function cleanUrl(value){
+  let s=String(value||'').trim().replace(/^["']|["']$/g,'');
+  if(!s)return null;
+  if(!/^https?:\/\//i.test(s))s='https://'+s;
+  try{const u=new URL(s);if(!['http:','https:'].includes(u.protocol)||!u.hostname.includes('.')||u.username||u.password)return null;return u.href}catch{return null}
+}
+function parseUrls(text){
+  const out=[],seen=new Set();
+  for(const line of text.split(/[\r\n,;]+/)){
+    const match=line.match(/https?:\/\/[^\s,"']+|(?:[a-z0-9-]+\.)+[a-z]{2,}(?:\/[^\s,"']*)?/i);
+    const url=cleanUrl(match?match[0]:line);
+    if(!url)continue;
+    const host=new URL(url).hostname.toLowerCase();
+    if(!seen.has(host)){seen.add(host);out.push(url)}
+  }
+  return out;
+}
+function esc(v){return String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}
+function tone(n){return n==null?'':n<50?'red':n<80?'yellow':'green'}
+function csv(v){return '"'+String(v??'').replace(/"/g,'""')+'"'}
+function updateStats(){
+  $('nStores').textContent=rows.length;
+  $('nEmails').textContent=rows.reduce((n,r)=>n+(r.emails||[]).length,0);
+  $('nWarnings').textContent=rows.reduce((n,r)=>n+(r.warnings||[]).length,0);
+  $('nGood').textContent=successful;
+  $('export').disabled=!rows.length;
+  $('exportContacts').disabled=!rows.some(r=>(r.emails||[]).length);
+}
+function render(){
+  const body=$('results');body.replaceChildren();
+  if(!rows.length){body.innerHTML='<tr><td colspan="8">No results yet.</td></tr>';updateStats();fillStores();return}
+  for(const r of rows){
+    const tr=document.createElement('tr'),score=r.healthScore;
+    const emails=(r.emails||[]).map(e=>'<div class="email">'+esc(e.email||e)+'</div>').join('')||'<span class="muted">Not found</span>';
+    const warnings=(r.warnings||[]).map(w=>esc(w.message||w)).join('<br>')||'<span class="green">No warnings in completed checks</span>';
+    tr.innerHTML=
+      '<td><a target="_blank" rel="noopener noreferrer" href="'+esc(r.url)+'">'+esc(r.domain||r.url)+'</a><div class="muted">'+esc(r.status||'')+'</div></td>'+
+      '<td><span class="score '+tone(score)+'">'+(score==null?'—':score+'%')+'</span><div class="bar"><span style="width:'+(score??0)+'%;background:var(--'+(tone(score)||'blue')+')"></span></div></td>'+
+      '<td>'+esc(r.httpStatus??'—')+(r.responseMs!=null?'<div class="muted">'+esc(r.responseMs)+' ms</div>':'')+'</td>'+
+      '<td>'+esc(r.title||'Not found')+'<div class="muted">H1: '+esc(r.h1Count??'—')+' · Description: '+(r.metaDescription?'Yes':'No')+' · Viewport: '+(r.viewport?'Yes':'No')+'</div></td>'+
+      '<td>'+(r.images?esc(r.images.withAlt+'/'+r.images.total+' images with alt'):'—')+'</td>'+
+      '<td>'+emails+'</td><td>'+warnings+'</td><td><button data-url="'+esc(r.url)+'">Select</button></td>';
+    body.append(tr);
+  }
+  body.querySelectorAll('[data-url]').forEach(b=>b.addEventListener('click',()=>selectStore(b.dataset.url)));
+  updateStats();fillStores();
+}
+function fillStores(){
+  const old=$('store').value,select=$('store');select.replaceChildren();
+  const first=document.createElement('option');first.value='';first.textContent='Choose a store';select.append(first);
+  rows.forEach(r=>{const o=document.createElement('option');o.value=r.url;o.textContent=r.domain||r.url;select.append(o)});
+  if(rows.some(r=>r.url===old))select.value=old;
+  syncStore();
+}
+function selectStore(url){$('store').value=url;syncStore();$('store').scrollIntoView({behavior:'smooth',block:'center'})}
+function syncStore(){
+  const r=rows.find(x=>x.url===$('store').value);
+  if(!r){$('recipient').value='';$('draft').disabled=true;$('details').textContent='Select a scanned store to view its findings.';return}
+  const e=(r.emails||[])[0];
+  $('recipient').value=e?(e.email||e):'';
+  $('draft').disabled=!$('recipient').value;
+  $('details').textContent=(r.warnings||[]).map(w=>w.message||w).join(' | ')||'No warnings from completed checks.';
+  if(e)$('details').textContent+=' Contact source: '+(e.source||'public page');
+  const issues=(r.warnings||[]).slice(0,2).map(w=>w.message||w).join('; ');
+  if(issues)$('message').value='Hello,\\n\\nI was reviewing your public storefront and noticed something that may be worth checking: '+issues+'.\\n\\nI can share a short explanation and practical suggestions if helpful. Would you like me to send the details?\\n\\nBest regards';
+}
+$('store').addEventListener('change',syncStore);
+$('demo').addEventListener('click',()=>{$('urls').value='https://www.example.com\\nhttps://www.shopify.com';say('Example URLs loaded. These are examples; replace them with stores you want to check.')});
+$('file').addEventListener('change',async e=>{const f=e.target.files?.[0];if(!f)return;$('urls').value=($('urls').value.trim()+'\\n'+await f.text()).trim();say('File imported. Review the URL list before scanning.');e.target.value=''});
+$('clear').addEventListener('click',()=>{$('urls').value='';rows=[];successful=0;render();say('Results cleared.')});
 
-function parseUrl(value){
- let raw=value.trim();
- if(!/^https?:\/\//i.test(raw))raw='https://'+raw;
- try{
-  const u=new URL(raw);
-  if(!['https:','http:'].includes(u.protocol)||
-     !u.hostname.includes('.')||u.username||u.password||
-     u.hostname==='localhost'||
-     /^\d{1,3}(\.\d{1,3}){3}$/.test(u.hostname))return null;
-  return u;
- }catch{return null}
-}
-function hash(text){
- let h=2166136261;
- for(let i=0;i<text.length;i++){
-  h^=text.charCodeAt(i);
-  h=Math.imul(h,16777619);
- }
- return h>>>0;
-}
-function rng(seed){
- let x=seed>>>0;
- return ()=>{x=(Math.imul(x,1664525)+1013904223)>>>0;return x/4294967296};
-}
-function tone(n){
- return n<50?'red':n<80?'yellow':'green';
-}
-function level(n){
- return n<50?'Needs attention':n<80?'Improve':'Good';
-}
-function setStatus(message,type){
- $('status').textContent=message;
- $('status').className='status show '+type;
-}
-function element(tag,className,text){
- const el=document.createElement(tag);
- if(className)el.className=className;
- if(text!==undefined)el.textContent=text;
- return el;
-}
-function renderIssue(item){
- const card=element('article','issue');
- const head=element('div','issuehead');
- head.append(element('strong','',item.icon+'  '+item.name));
- head.append(element('span','badge '+tone(item.health),level(item.health)));
- const track=element('div','track');
- const bar=element('div','bar');
- bar.style.width=item.health+'%';
- bar.style.background='var(--'+tone(item.health)+')';
- track.append(bar);
- card.append(head,track,
-  element('div','muted', 'Health: '+item.health+'%'),
-  element('p','',item.health<50
-    ?'Low indicator: review this area first.'
-    :item.health<80
-      ?'Moderate indicator: improvements may be useful.'
-      :'Good practice indicator: verify with a real audit.'));
- return card;
-}
-function renderFinding(item){
- const row=element('div','finding');
- row.append(element('div','findicon','!'));
- const body=element('div','');
- body.style.flex='1';
- body.append(
-  element('div','priority '+tone(item.health),level(item.health).toUpperCase()+' · '+item.health+'% HEALTH'),
-  element('strong','',item.name+': '+item.problem),
-  element('p','','Recommended action: '+item.fix),
-  element('p','','Verification: '+item.evidence)
- );
- row.append(body);
- return row;
-}
-function runAnalysis(url){
- const domain=url.hostname.toLowerCase();
- const random=rng(hash(domain));
- const isHttps=url.protocol==='https:';
- const isShopify=domain.endsWith('.myshopify.com');
- const tracking=/[?&](utm_[^=]*|gclid|fbclid)=/i.test(url.search);
-
- const results=checks.map((c,i)=>{
-  let health=Math.round(25+random()*75);
-  if(i===6&&!isHttps)health=Math.min(health,45);
-  if(i===2&&tracking)health=Math.min(health,65);
-  return {...c,health};
- });
-
- // HTTPS is a real URL-scheme check; other scores are simulated for practice.
- if(!isHttps)results[6].health=20;
-
- const average=Math.round(results.reduce((sum,item)=>sum+item.health,0)/results.length);
- const urgent=results.filter(x=>x.health<50).length;
- const improve=results.filter(x=>x.health>=50&&x.health<80).length;
- const good=results.filter(x=>x.health>=80).length;
-
- $('score').textContent=average;
- $('gauge').style.background='conic-gradient(var(--'+tone(average)+') '+average+'%,#273148 0)';
- $('grade').textContent=average<50?'Poor health indicator':average<80?'Needs improvement':'Good indicators';
- $('scoreNote').textContent='Simulated practice result';
- $('high').textContent=urgent;
- $('medium').textContent=improve;
- $('low').textContent=good;
- $('total').textContent=results.length;
- $('summaryNote').textContent=urgent
-  +' area(s) have low simulated health percentages. Start with the red indicators.';
- $('storeDomain').textContent=url.href;
- $('storeDetails').textContent='Domain format: valid. HTTPS: '+(isHttps?'yes':'no')+
-  '. Shopify domain pattern: '+(isShopify?'detected':'not detected')+'.';
-
- $('issues').replaceChildren();
- results.forEach(item=>$('issues').append(renderIssue(item)));
-
- $('findings').replaceChildren();
- const sorted=[...results].sort((a,b)=>a.health-b.health);
- sorted.forEach(item=>$('findings').append(renderFinding(item)));
-
- // Add explicit real URL-level findings.
- if(!isHttps){
-  const item={
-   name:'HTTPS URL',
-   health:20,
-   problem:'The entered address uses HTTP.',
-   fix:'Use the HTTPS address for your public storefront and configure a secure redirect.',
-   evidence:'The entered URL uses HTTP; the website certificate has not been tested.'
-  };
-  $('findings').prepend(renderFinding(item));
- }
- if(tracking){
-  const item={
-   name:'URL tracking parameters',
-   health:60,
-   problem:'Common marketing tracking parameters are present.',
-   fix:'Use a clean canonical URL when sharing pages and verify canonical metadata.',
-   evidence:'The query string was checked; page metadata was not fetched.'
-  };
-  $('findings').prepend(renderFinding(item));
- }
-
- $('time').textContent='Generated '+new Date().toLocaleString();
- $('modeBadge')?.remove();
- latest={
-  reportType:'StorePulse practice audit',
-  domain:url.href,
-  generatedAt:new Date().toISOString(),
-  practiceMode:true,
-  overallHealth:average,
-  areas:results.map(x=>({name:x.name,healthPercent:x.health,indicator:level(x.health)})),
-  realUrlChecks:{validDomainFormat:true,https:isHttps,shopifyDomainPattern:isShopify,trackingParameters:tracking},
-  note:'Category percentages are simulated for practice and do not represent verified defects.'
- };
- $('download').disabled=false;
- setStatus('Practice report generated for '+domain+'. The URL format was checked; category percentages are simulated, not live measurements.','good');
-}
-$('form').addEventListener('submit',event=>{
- event.preventDefault();
- const url=parseUrl($('url').value);
- if(!url){
-  setStatus('Enter a valid public domain, such as mystore.com.','error');
-  return;
- }
- $('submit').disabled=true;
- $('submit').textContent='Analyzing…';
- try{runAnalysis(url)}
- catch(err){
-  console.error(err);
-  setStatus('Could not generate the report. Please check the URL and try again.','error');
- }finally{
-  $('submit').disabled=false;
-  $('submit').textContent='Analyze Store →';
- }
+$('scan').addEventListener('click',async()=>{
+  const endpoint=$('api').value.trim().replace(/\/+$/,'');
+  try{if(!endpoint||new URL(endpoint).protocol!=='https:')throw Error()}catch{say('Enter your deployed HTTPS Worker URL first.','error');return}
+  const urls=parseUrls($('urls').value);
+  if(!urls.length){say('Paste at least one valid store URL.','error');return}
+  if(urls.length>100){say('Maximum 100 URLs per run.','error');return}
+  $('scan').disabled=true;successful=0;
+  try{
+    for(let i=0;i<urls.length;i++){
+      say('Scanning '+(i+1)+'/'+urls.length+': '+new URL(urls[i]).hostname+' …');
+      try{
+        const res=await fetch(endpoint+'/scan',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({url:urls[i]})});
+        const data=await res.json().catch(()=>({error:'The API returned an unreadable response.'}));
+        if(!res.ok)throw Error(data.error||'HTTP '+res.status);
+        const r=data.result||data,idx=rows.findIndex(x=>x.domain===r.domain);
+        if(idx>=0)rows[idx]=r;else rows.push(r);
+        successful++;
+      }catch(err){
+        const domain=new URL(urls[i]).hostname,failed={url:urls[i],domain,status:'Scan failed',healthScore:null,emails:[],warnings:[{message:'Scan failed: '+err.message}]};
+        const idx=rows.findIndex(x=>x.domain===domain);if(idx>=0)rows[idx]=failed;else rows.push(failed);
+      }
+      render();
+    }
+    say('Finished. '+successful+' of '+urls.length+' scans returned results. Failed scans have no invented score.',successful?'good':'error');
+  }finally{$('scan').disabled=false}
 });
-$('download').addEventListener('click',()=>{
- if(!latest)return;
- const blob=new Blob([JSON.stringify(latest,null,2)],{type:'application/json'});
- const link=document.createElement('a');
- const objectUrl=URL.createObjectURL(blob);
- link.href=objectUrl;
- link.download='storepulse-practice-report.json';
- link.click();
- setTimeout(()=>URL.revokeObjectURL(objectUrl),1000);
+
+function download(name,data){
+  const blob=new Blob(['\\ufeff'+data.map(row=>row.map(csv).join(',')).join('\\r\\n')],{type:'text/csv;charset=utf-8'});
+  const a=document.createElement('a'),url=URL.createObjectURL(blob);a.href=url;a.download=name;a.click();setTimeout(()=>URL.revokeObjectURL(url),1000);
+}
+$('export').addEventListener('click',()=>download('storepulse-audit.csv',[
+ ['url','domain','health_score','http_status','response_ms','title','h1_count','meta_description','viewport','images_total','images_with_alt','emails','warnings'],
+ ...rows.map(r=>[r.url,r.domain,r.healthScore,r.httpStatus,r.responseMs,r.title,r.h1Count,r.metaDescription,r.viewport,r.images?.total,r.images?.withAlt,(r.emails||[]).map(e=>e.email||e).join('; '),(r.warnings||[]).map(w=>w.message||w).join('; ')])
+]));
+$('exportContacts').addEventListener('click',()=>download('storepulse-public-contacts.csv',[
+ ['store_domain','email','source_page'],
+ ...rows.flatMap(r=>(r.emails||[]).map(e=>[r.domain,e.email||e,e.source||'']))
+]));
+$('draft').addEventListener('click',()=>{
+  const to=$('recipient').value.trim(),r=rows.find(x=>x.url===$('store').value);
+  if(!r||!/^[^\\s@]+@[^\\s@]+\\.[^\\s@]+$/.test(to)){say('Choose a store and check the email address.','error');return}
+  const subject=$('subject').value.trim();
+  const body=$('message').value.trim()+'\\n\\nStore reviewed: '+r.url;
+  location.href='mailto:'+encodeURIComponent(to)+'?subject='+encodeURIComponent(subject)+'&body='+encodeURIComponent(body);
 });
-$('print').addEventListener('click',()=>window.print());
+render();
 </script>
 </body>
 </html>
